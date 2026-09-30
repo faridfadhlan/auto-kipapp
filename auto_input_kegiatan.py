@@ -4,7 +4,27 @@ import argparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-USER_DATA_DIR = Path(__file__).parent / "browser_data"
+def get_browser_data_dir(custom_path: str = "") -> Path:
+    """
+    Menemukan direktori browser_data secara dinamis:
+    1. Jika ditentukan lewat parameter custom_path
+    2. Jika ada folder browser_data di project folder pengguna saat ini (Path.cwd())
+    3. Jika ada folder browser_data di samping skrip
+    4. Default ke ~/.kipapp/browser_data (persisten antar seluruh project pengguna)
+    """
+    if custom_path:
+        p = Path(custom_path).expanduser().resolve()
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    cwd_dir = Path.cwd() / "browser_data"
+    if cwd_dir.exists():
+        return cwd_dir
+    script_dir = Path(__file__).parent / "browser_data"
+    if script_dir.exists():
+        return script_dir
+    home_dir = Path.home() / ".kipapp" / "browser_data"
+    home_dir.mkdir(parents=True, exist_ok=True)
+    return home_dir
 
 def load_activities(file_path: Path):
     ext = file_path.suffix.lower()
@@ -80,7 +100,7 @@ def normalize_periode(periode_str: str) -> str:
         return "Tahunan"
     return periode_str
 
-def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", dry_run: bool = False):
+def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", browser_data: str = "", dry_run: bool = False):
     activities_file = Path(file_path)
     if not activities_file.exists():
         print(f"[ERROR] File kegiatan {file_path} tidak ditemukan!")
@@ -97,12 +117,14 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
         return
 
     norm_periode = normalize_periode(periode_keyword)
+    user_data_dir = get_browser_data_dir(browser_data)
 
     print("=" * 65)
     print(f"Memulai Otomasi Input Kegiatan KIPApp BPS ({len(activities)} kegiatan)")
     print(f"Periode SKP Target: {norm_periode} (Input: {periode_keyword})")
     if tahun:
         print(f"Tahun Anggaran/SKP: {tahun}")
+    print(f"Profil Browser: {user_data_dir}")
     if default_drive_url:
         print(f"Default Google Drive Link: {default_drive_url}")
     print(f"Mode: {'DRY RUN (Preview Tanpa Save)' if dry_run else 'LIVE (Simpan ke KIPApp)'}")
@@ -110,7 +132,7 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
 
     with sync_playwright() as p:
         context = p.chromium.launch_persistent_context(
-            user_data_dir=str(USER_DATA_DIR),
+            user_data_dir=str(user_data_dir),
             headless=False,
             viewport={"width": 1400, "height": 900},
             args=["--disable-blink-features=AutomationControlled"]
@@ -296,7 +318,8 @@ if __name__ == "__main__":
     parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', 'TW IV')")
     parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")
+    parser.add_argument("--browser-data", default="", help="Lokasi kustom direktori browser_data (opsional)")
     parser.add_argument("--dry-run", action="store_true", help="Uji coba pengisian form tanpa mengklik Save")
     args = parser.parse_args()
 
-    input_kegiatan(args.file, args.periode, tahun=args.tahun, default_drive_url=args.drive_url, dry_run=args.dry_run)
+    input_kegiatan(args.file, args.periode, tahun=args.tahun, default_drive_url=args.drive_url, browser_data=args.browser_data, dry_run=args.dry_run)

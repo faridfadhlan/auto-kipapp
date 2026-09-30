@@ -11,9 +11,21 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 
 ## 📍 Lingkungan & Lokasi Proyek
 
-- Direktori Proyek: Root direktori `auto-kipapp`
-- Interpreter & Tools: `uv` (jalankan perintah via `uv run python <script>`)
-- Sesi Browser: Simpan otomatis di `browser_data/` setelah login SSO satu kali
+- **Direktori Proyek**: **Dinamis menyesuaikan folder project aktif pengguna** (`current working directory` / root workspace pengguna saat ini).
+  - Agen TIDAK BOLEH mengasumsikan folder bernama tertentu (seperti `auto-kipapp`).
+  - Semua file input pengguna (Excel, CSV, JSON) dibaca langsung dari folder project aktif tempat pengguna berada.
+  - Semua file output yang dihasilkan (seperti `kegiatan_auto_generated.json`, screenshot review) disimpan langsung di folder project aktif tempat pengguna berada.
+- **Eksekusi Skrip Otomasi**:
+  - Jika skrip otomasi tersedia di folder project pengguna:
+    ```bash
+    uv run python auto_input_kegiatan.py ...
+    ```
+  - Jika pengguna berada di folder project lain, agen dapat menjalankan skrip dari repositori skill global:
+    ```bash
+    uv run python ~/.gemini/config/skills/kipapp/scripts/auto_input_kegiatan.py ...
+    ```
+- **Sesi Login Browser**:
+  - Terpusat dan otomatis dideteksi di `./browser_data` (jika ada di project) atau `~/.kipapp/browser_data` (direktori global pengguna). Login SSO BPS hanya perlu dilakukan sekali dan langsung berlaku untuk project pengguna mana pun.
 
 ---
 

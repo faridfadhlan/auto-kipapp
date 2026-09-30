@@ -6,7 +6,27 @@ import argparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-USER_DATA_DIR = Path(__file__).parent / "browser_data"
+def get_browser_data_dir(custom_path: str = "") -> Path:
+    """
+    Menemukan direktori browser_data secara dinamis:
+    1. Jika ditentukan lewat parameter custom_path
+    2. Jika ada folder browser_data di project folder pengguna saat ini (Path.cwd())
+    3. Jika ada folder browser_data di samping skrip
+    4. Default ke ~/.kipapp/browser_data (persisten antar seluruh project pengguna)
+    """
+    if custom_path:
+        p = Path(custom_path).expanduser().resolve()
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    cwd_dir = Path.cwd() / "browser_data"
+    if cwd_dir.exists():
+        return cwd_dir
+    script_dir = Path(__file__).parent / "browser_data"
+    if script_dir.exists():
+        return script_dir
+    home_dir = Path.home() / ".kipapp" / "browser_data"
+    home_dir.mkdir(parents=True, exist_ok=True)
+    return home_dir
 
 def clean_rk_topic(rk_text: str) -> str:
     """
@@ -132,16 +152,18 @@ def get_period_dates(periode_str: str, tahun: int = None) -> tuple[str, str, str
         
     return periode_str, f"{tahun}-04-01", f"{tahun}-06-30"
 
-def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II", tahun: str = "") -> list[str]:
+def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II", tahun: str = "", browser_data: str = "") -> list[str]:
     """
     Membuka KIPApp secara otomatis via persistent browser session
     dan membaca seluruh opsi butir Rencana Kinerja (SKP) pengguna yang aktif.
     """
     norm_periode, _, _ = get_period_dates(periode_keyword, int(tahun) if str(tahun).isdigit() else None)
+    user_data_dir = get_browser_data_dir(browser_data)
     print(f"\n[1/2] Menghubungkan ke KIPApp untuk membaca Rencana Kinerja ({norm_periode})...")
+    print(f"      Profil Browser: {user_data_dir}")
     with sync_playwright() as p:
         ctx = p.chromium.launch_persistent_context(
-            str(USER_DATA_DIR),
+            str(user_data_dir),
             headless=True,
             args=["--disable-blink-features=AutomationControlled"]
         )
@@ -291,6 +313,7 @@ def main():
     parser.add_argument("--drive-url", "-d", default="", help="Default URL Google Drive bukti dukung")
     parser.add_argument("--count", "-c", type=int, default=2, help="Jumlah kegiatan per butir RK (default: 2)")
     parser.add_argument("--templates", help="Path ke file JSON custom templates (opsional)")
+    parser.add_argument("--browser-data", default="", help="Lokasi kustom direktori browser_data (opsional)")
 
     args = parser.parse_args()
 
@@ -303,7 +326,7 @@ def main():
 
     rk_list = []
     if args.fetch_rk:
-        rk_list = fetch_user_rencana_kinerja(norm_periode, tahun=args.tahun)
+        rk_list = fetch_user_rencana_kinerja(norm_periode, tahun=args.tahun, browser_data=args.browser_data)
     elif args.rk:
         rk_list = [item.strip() for item in args.rk.split(";") if item.strip()]
     elif args.rk_file and Path(args.rk_file).exists():
@@ -317,7 +340,7 @@ def main():
         # Default: Coba fetch otomatis dari KIPApp pengguna aktif
         print("Tidak ada input RK yang diberikan. Mencoba mengambil otomatis dari akun KIPApp...")
         try:
-            rk_list = fetch_user_rencana_kinerja(norm_periode, tahun=args.tahun)
+            rk_list = fetch_user_rencana_kinerja(norm_periode, tahun=args.tahun, browser_data=args.browser_data)
         except Exception as e:
             print(f"[ERROR] Gagal mengambil RK dari browser: {e}")
             print("Gunakan opsi --rk \"Rencana 1; Rencana 2\" atau --rk-file <path_file.json>")

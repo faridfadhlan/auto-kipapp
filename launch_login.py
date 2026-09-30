@@ -3,18 +3,32 @@ import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-USER_DATA_DIR = Path(__file__).parent / "browser_data"
+def get_browser_data_dir(custom_path: str = "") -> Path:
+    if custom_path:
+        p = Path(custom_path).expanduser().resolve()
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    cwd_dir = Path.cwd() / "browser_data"
+    if cwd_dir.exists():
+        return cwd_dir
+    script_dir = Path(__file__).parent / "browser_data"
+    if script_dir.exists():
+        return script_dir
+    home_dir = Path.home() / ".kipapp" / "browser_data"
+    home_dir.mkdir(parents=True, exist_ok=True)
+    return home_dir
 
 def main():
+    user_data_dir = get_browser_data_dir()
     print("=" * 60)
     print("Membuka browser untuk login KIPApp BPS...")
-    print(f"Profil browser disimpan di: {USER_DATA_DIR.resolve()}")
+    print(f"Profil browser disimpan di: {user_data_dir.resolve()}")
     print("=" * 60)
 
     with sync_playwright() as p:
         # Launch persistent context agar session/cookies tetap tersimpan
         context = p.chromium.launch_persistent_context(
-            user_data_dir=str(USER_DATA_DIR),
+            user_data_dir=str(user_data_dir),
             headless=False,
             viewport={"width": 1280, "height": 800},
             args=[
