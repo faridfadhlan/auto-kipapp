@@ -18,6 +18,7 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
    - Teks langsung di pesan chat
 7. **Integrasi Google Drive**: Otomatis mengisi link bukti dukung (folder utama atau per kegiatan).
 8. **Mode Dry-Run (Preview)**: Memungkinkan Anda melihat tampilan pengisian form sebelum disimpan ke server KIPApp (dilengkapi screenshot review).
+9. **Edit / Pembaruan Isian Realisasi SKP**: Mampu memperbarui data kegiatan yang telah tersimpan di KIPApp secara massal maupun terfilter (mengisi/mengganti tautan bukti dukung Google Drive, mengubah persentase progres, deskripsi capaian, dan centang capaian SKP).
 
 ---
 
@@ -84,5 +85,5 @@ Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup 
 > *"Tolong catat kegiatan ke KIPApp tanggal 15–19 Juni 2026: 'Pelaksanaan pengawasan survei ekonomi di lapangan' untuk butir SKP pengolahan dengan progres 100%."*
 
 #### 🔹 8. Edit / Pembaruan Massal Butir Realisasi (Update Bukti Dukung ke Google Drive)
-> *"Tolong tambahkan/update semua bukti dukung kegiatan di Triwulan II ke URL folder Google Drive: https://drive.google.com/drive/folders/1c2MxKHbq3jse08vTIZs0o9lw2cjLvK5Y?usp=sharing"*
-> *(Atau: "Lengkapi bukti dukung yang masih kosong saja di Triwulan II dengan link Drive https://drive.google.com/...")*
+> *"Tolong tambahkan/update semua bukti dukung kegiatan di Triwulan II ke URL folder Google Drive: https://drive.google.com/drive/folders/<ID_FOLDER_GOOGLE_DRIVE>"*
+> *(Atau: "Lengkapi bukti dukung yang masih kosong saja di Triwulan II dengan link Drive https://drive.google.com/drive/folders/...")*
