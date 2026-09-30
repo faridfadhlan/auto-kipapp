@@ -145,4 +145,21 @@ Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Antigravity, Open
   1. Buat file JSON sementara berisi kegiatan tersebut.
   2. Jalankan `auto_input_kegiatan.py` dengan file JSON tersebut.
 
+### Skenario 6: Mengambil Referensi dari File Bebas (.txt, .md, Log Kerja, Catatan Harian)
+- **Prompt Contoh**: *"Saya punya catatan tugas di file catatan_mingguan.txt. Tolong baca dan cocokkan dengan butir SKP akun KIPApp saya untuk Triwulan II, lalu inputkan ke KIPApp."*
+- **Tindakan Agent**:
+  1. Baca file referensi pengguna (`.txt`, `.csv`, `.xlsx`, `.md`, dll.) menggunakan tool pembaca file.
+  2. Ambil butir SKP aktif pengguna di KIPApp via `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"`.
+  3. Lakukan pencocokan semantik (semantic matching) antara deskripsi kegiatan pengguna di file dengan butir SKP yang paling sesuai.
+  4. Susun daftar kegiatan lengkap (tanggal, keyword SKP, kegiatan, capaian, progres) ke file JSON.
+  5. Eksekusi `uv run python auto_input_kegiatan.py --file <file_json> --periode "<PERIODE>"`.
+  6. Laporkan kegiatan yang berhasil diinput kepada pengguna dan bersihkan file JSON sementara jika diperlukan.
+
+### Skenario 7: Mengambil File Referensi dengan Filter / Kriteria Spesifik
+- **Prompt Contoh**: *"Dari file rekap.xlsx atau log.txt, ambil hanya kegiatan minggu kedua bulan Juni dan inputkan ke KIPApp."*
+- **Tindakan Agent**:
+  1. Baca file yang dimaksud dan filter baris kegiatan sesuai rentang tanggal atau kriteria yang diminta pengguna.
+  2. Petakan ke butir SKP KIPApp.
+  3. Inputkan ke KIPApp menggunakan `auto_input_kegiatan.py`.
+
 

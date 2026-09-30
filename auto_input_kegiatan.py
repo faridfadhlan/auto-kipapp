@@ -26,6 +26,8 @@ def get_browser_data_dir(custom_path: str = "") -> Path:
     home_dir.mkdir(parents=True, exist_ok=True)
     return home_dir
 
+import re
+
 def load_activities(file_path: Path):
     ext = file_path.suffix.lower()
     if ext == ".json":
@@ -59,12 +61,21 @@ def load_activities(file_path: Path):
 
         df = df.rename(columns=col_map)
         
-        # Format dates
+        def format_date_cell(val):
+            if pd.isna(val):
+                return ""
+            s = str(val).strip()
+            if " - " in s or " s.d " in s:
+                return s
+            try:
+                return pd.to_datetime(s).strftime("%Y-%m-%d")
+            except Exception:
+                return s
+
         if "tanggal" in df.columns:
-            df["tanggal"] = pd.to_datetime(df["tanggal"]).dt.strftime("%Y-%m-%d")
+            df["tanggal"] = df["tanggal"].apply(format_date_cell)
 
         records = df.to_dict(orient="records")
-        # Fill missing values
         clean_records = []
         for r in records:
             clean_records.append({
@@ -77,10 +88,114 @@ def load_activities(file_path: Path):
                 "masuk_capaian_skp": bool(r.get("masuk_capaian_skp", False)) if pd.notna(r.get("masuk_capaian_skp")) else False,
             })
         return clean_records
-    else:
-        raise ValueError(f"Format file '{ext}' tidak didukung. Gunakan .json, .csv, atau .xlsx")
+    elif ext in [".txt", ".tsv", ".log", ".md"]:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
 
-import re
+        # 1. Cek jika isinya format JSON
+        if (content.startswith("[") and content.endswith("]")) or (content.startswith("{") and content.endswith("}")):
+            try:
+                parsed = json.loads(content)
+                return parsed if isinstance(parsed, list) else [parsed]
+            except Exception:
+                pass
+
+        # 2. Parse baris demi baris teks
+        bulan_map = {
+            "januari": "01", "jan": "01", "februari": "02", "feb": "02",
+            "maret": "03", "mar": "03", "april": "04", "apr": "04",
+            "mei": "05", "may": "05", "juni": "06", "jun": "06",
+            "juli": "07", "jul": "07", "agustus": "08", "agu": "08", "agt": "08",
+            "september": "09", "sep": "09", "oktober": "10", "okt": "10",
+            "november": "11", "nov": "11", "desember": "12", "des": "12"
+        }
+
+        records = []
+        for line in content.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or line.startswith("//"):
+                continue
+
+            # Pipe separated: Tanggal | [RK] | Kegiatan | [Progres] | [Link]
+            if "|" in line:
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 3:
+                    records.append({
+                        "tanggal": parts[0],
+                        "rencana_kinerja_keyword": parts[1],
+                        "kegiatan": parts[2],
+                        "progres": int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 100,
+                        "capaian": parts[2],
+                        "link_dukung": parts[4] if len(parts) > 4 else "",
+                        "masuk_capaian_skp": False
+                    })
+                    continue
+                elif len(parts) == 2:
+                    records.append({
+                        "tanggal": parts[0],
+                        "rencana_kinerja_keyword": "",
+                        "kegiatan": parts[1],
+                        "progres": 100,
+                        "capaian": parts[1],
+                        "link_dukung": "",
+                        "masuk_capaian_skp": False
+                    })
+                    continue
+
+            # Format teks dengan tanggal di awal
+            cleaned = re.sub(r"^[-*•]\s*", "", line).strip()
+
+            # Deteksi: "5 Juni 2026: Kegiatan..."
+            id_match = re.match(r"^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})\s*[:\-–]\s*(.+)$", cleaned, re.IGNORECASE)
+            if id_match:
+                d, m_name, y, text = id_match.groups()
+                m_num = bulan_map.get(m_name.lower(), "01")
+                tgl = f"{y}-{m_num}-{int(d):02d}"
+                records.append({
+                    "tanggal": tgl,
+                    "rencana_kinerja_keyword": "",
+                    "kegiatan": text.strip(),
+                    "progres": 100,
+                    "capaian": text.strip(),
+                    "link_dukung": "",
+                    "masuk_capaian_skp": False
+                })
+                continue
+
+            # Deteksi: "2026-06-05: Kegiatan..." atau "05-06-2026: Kegiatan..."
+            iso_match = re.match(r"^(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})\s*[:\-–]\s*(.+)$", cleaned)
+            if iso_match:
+                tgl_raw = iso_match.group(1).replace("/", "-")
+                text = iso_match.group(2).strip()
+                p = tgl_raw.split("-")
+                if len(p[0]) == 2 and len(p[2]) == 4:
+                    tgl = f"{p[2]}-{int(p[1]):02d}-{int(p[0]):02d}"
+                else:
+                    tgl = tgl_raw
+                records.append({
+                    "tanggal": tgl,
+                    "rencana_kinerja_keyword": "",
+                    "kegiatan": text,
+                    "progres": 100,
+                    "capaian": text,
+                    "link_dukung": "",
+                    "masuk_capaian_skp": False
+                })
+                continue
+
+            records.append({
+                "tanggal": "",
+                "rencana_kinerja_keyword": "",
+                "kegiatan": cleaned,
+                "progres": 100,
+                "capaian": cleaned,
+                "link_dukung": "",
+                "masuk_capaian_skp": False
+            })
+
+        return records
+    else:
+        raise ValueError(f"Format file '{ext}' tidak didukung. Gunakan .json, .csv, .xlsx, atau .txt")
 
 def normalize_periode(periode_str: str) -> str:
     """
@@ -353,7 +468,7 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Otomasi Input Kegiatan KIPApp BPS")
-    parser.add_argument("--file", "-f", default="daftar_kegiatan_template.json", help="Path ke file JSON kegiatan")
+    parser.add_argument("--file", "-f", default="daftar_kegiatan_template.json", help="Path ke file data kegiatan (.xlsx, .csv, .json, .txt)")
     parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', 'TW IV')")
     parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")

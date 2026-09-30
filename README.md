@@ -61,17 +61,23 @@ Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup 
 
 ### 💬 Contoh Perintah Chat ke Agent AI:
 
-#### 🔹 1. Auto-Generate Kegiatan dari Butir SKP Akun Anda
+#### 🔹 1. Mengambil Referensi dari File Catatan Bebas (`.txt`, `.md`, Log Kerja)
+> *"Saya punya catatan kegiatan di file `catatan_harian.txt`. Tolong baca file tersebut, cocokkan setiap aktivitasnya dengan butir SKP di akun KIPApp saya untuk Triwulan II 2026, lalu inputkan ke KIPApp."*
+
+#### 🔹 2. Mengambil Referensi dari Rekap Excel / CSV
+> *"Tolong baca file `rekap_pekerjaan.xlsx` (atau `daftar_kegiatan.csv`). Sesuaikan tanggal dan kegiatannya dengan SKP saya di KIPApp Triwulan II, lalu simpan ke KIPApp dengan link bukti dukung https://drive.google.com/..."*
+
+#### 🔹 3. Membaca File Referensi dengan Filter Tanggal Spesifik
+> *"Dari file `log_tugas.txt`, ambil hanya kegiatan untuk minggu kedua Juni (tanggal 8 s.d 12 Juni 2026), lalu inputkan ke KIPApp Triwulan II."*
+
+#### 🔹 4. Auto-Generate Kegiatan dari Butir SKP Akun Anda (Tanpa File)
 > *"Tolong buatkan kegiatan SKP untuk Triwulan II tahun 2026 dari akun KIPApp saya dan sebarkan ke hari kerja efektif."*
 
-#### 🔹 2. Input Kegiatan dari File (Excel / CSV / JSON)
-> *"Inputkan file kegiatan_juni.xlsx ke KIPApp periode Triwulan II dengan link folder bukti dukung https://drive.google.com/..."*
+#### 🔹 5. Input File dengan Bukti Dukung Lokal (Auto-Upload ke Google Drive)
+> *"Tolong inputkan kegiatan dari file `capaian.xlsx` ke KIPApp. Jika kolom bukti dukung memuat file PDF/foto lokal, upload otomatis ke Google Drive saya."*
 
-#### 🔹 3. Input dengan Bukti Dukung File Lokal (Auto-Upload ke Google Drive)
-> *"Tolong inputkan kegiatan dari file capaian.xlsx ke KIPApp. Jika kolom bukti dukung memuat file PDF/foto lokal, upload otomatis ke Google Drive saya."*
+#### 🔹 6. Simulasi / Uji Coba Pengisian (Dry-Run Preview)
+> *"Coba simulasikan pengisian KIPApp dari file `catatan.txt` dengan mode dry-run, tampilkan screenshot preview dan jangan klik simpan dulu."*
 
-#### 🔹 4. Simulasi / Uji Coba Pengisian (Dry-Run Preview)
-> *"Coba simulasikan pengisian KIPApp untuk file kegiatan.json dengan mode dry-run, jangan klik simpan dulu."*
-
-#### 🔹 5. Input Kegiatan Langsung Lewat Chat (Tanpa File)
+#### 🔹 7. Input Kegiatan Langsung Lewat Chat (Tanpa File)
 > *"Tolong catat kegiatan ke KIPApp tanggal 15–19 Juni 2026: 'Pelaksanaan pengawasan survei ekonomi di lapangan' untuk butir SKP pengolahan dengan progres 100%."*

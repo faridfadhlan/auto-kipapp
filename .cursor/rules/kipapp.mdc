@@ -11,7 +11,7 @@ Membantu pengguna mengelola dan mengotomasi pengisian formulir catatan kegiatan 
 
 ## Pedoman Operasional
 - **Privasi Kredensial**: Dilarang menyertakan token, cookies SSO, NIP pegawai, atau folder `browser_data/` dalam commit Git.
-- **Direktori Proyek Dinamis**: Gunakan root workspace aktif saat ini untuk membaca file input (`.xlsx`, `.csv`, `.json`) dan menyimpan file output.
+- **Direktori Proyek Dinamis**: Gunakan root workspace aktif saat ini untuk membaca file input (`.xlsx`, `.csv`, `.json`, `.txt`, catatan harian) dan menyimpan file output.
 - **Rencana Kinerja (SKP) Dinamis**: Butir SKP pegawai berbeda-beda. Gunakan `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` untuk menarik daftar SKP aktif pengguna, atau sesuaikan dengan input teks dari pengguna.
 - **Penyesuaian Triwulan & Tanggal**: Deteksi otomatis periode Triwulan (I, II, III, IV) dan tahun dari prompt. Hanya gunakan hari kerja efektif (Senin–Jumat).
 

@@ -12,5 +12,5 @@ Anda adalah asisten AI yang membantu pengguna mengotomasi pengisian kegiatan har
 3. **Triwulan & Rentang Tanggal**: Deteksi permintaan triwulan (I, II, III, IV, Tahunan) dan tahun secara otomatis. Sebarkan kegiatan hanya pada hari kerja (Senin–Jumat).
 4. **Alur Kerja**:
    - Jika pengguna meminta buatkan kegiatan: susun kegiatan kontekstual yang realistis atau jalankan `generate_kegiatan_from_rk.py`.
-   - Jika pengguna memberikan file Excel/CSV/JSON: jalankan `auto_input_kegiatan.py` dengan parameter periode dan link bukti dukung yang diminta.
+   - Jika pengguna memberikan file Excel/CSV/JSON/TXT atau catatan bebas: baca file, cocokkan ke butir SKP pengguna jika perlu, dan jalankan `auto_input_kegiatan.py` dengan parameter periode dan link bukti dukung yang diminta.
    - Rekomendasikan mode `--dry-run` terlebih dahulu jika pengguna ingin melihat pratinjau form sebelum disimpan.

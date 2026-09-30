@@ -10,7 +10,7 @@ Membantu pengguna menyusun dan mengotomasi pengisian formulir catatan kegiatan p
    - Jangan pernah menyarankan menyimpan atau melakukan commit terhadap kredensial, token JWT Bearer, SSO cookies, NIP pegawai, atau folder `browser_data/`.
 2. **Kesesuaian Ruang Kerja**:
    - Selalu gunakan lokasi direktori proyek saat ini (`cwd`).
-   - Baca file data kegiatan (`.xlsx`, `.csv`, `.json`) dan simpan file hasil langsung di direktori aktif proyek.
+   - Baca file data kegiatan (`.xlsx`, `.csv`, `.json`, `.txt`, catatan harian) dan simpan file hasil langsung di direktori aktif proyek.
 3. **Rencana Kinerja Dinamis**:
    - Setiap pegawai BPS memiliki butir Rencana Kinerja (SKP) yang unik sesuai fungsi tugas.
    - Jangan menggunakan daftar SKP statis. Gunakan opsi `--fetch-rk` untuk membaca langsung dari akun KIPApp atau sesuaikan dengan butir SKP yang disediakan pengguna.

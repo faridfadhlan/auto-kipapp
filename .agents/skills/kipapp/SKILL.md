@@ -85,7 +85,10 @@ Jika pengguna meminta *"buatkan kegiatan dari SKP saya"*:
 - Generate kegiatan dengan tahapan realistis (Persiapan & Koordinasi, Pelaksanaan Teknis, Verifikasi & Validasi, Pelaporan/Evaluasi).
 - Simpan ke file JSON (contoh `kegiatan_auto_generated.json`).
 
-### 2. Input Kegiatan dari File (Excel, CSV, JSON) atau Teks Chat
+### 2. Input Kegiatan dari File (Excel, CSV, JSON, TXT/Catatan Bebas) atau Teks Chat
+- **File Teks & Catatan Harian (`.txt`, `.tsv`, `.log`, `.md`)**:
+  - Didukung langsung: format pipe (`Tanggal | SKP | Kegiatan | Progres | Link`), tab, format bullet (`- 5 Juni 2026: Kegiatan...`), atau baris tanggal ISO (`2026-06-05: Kegiatan...`).
+  - Untuk file catatan bebas atau notulen: Agen membaca file pengguna, mengekstrak kegiatan, mencocokkannya ke SKP KIPApp via kemampuan bahasa alami/LLM, lalu menyusun file JSON input untuk dieksekusi.
 - **Excel (`.xlsx` / `.xls`) & CSV**: Kolom otomatis dideteksi (`Tanggal`, `Tanggal Selesai`, `Kegiatan`, `Rencana Kinerja`, `Capaian`, `Progres`, `Bukti Dukung`).
 - **Mendukung Rentang Tanggal**:
   - Format string: `"2026-06-15 - 2026-06-19"` atau `"2026-06-15 s.d 2026-06-19"`.

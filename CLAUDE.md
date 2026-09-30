@@ -36,7 +36,7 @@ uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --perio
 ```
 
 ## Format Data Kegiatan
-Mendukung file Excel (`.xlsx`, `.xls`), CSV (`.csv`), dan JSON (`.json`) dengan kolom:
+Mendukung file Excel (`.xlsx`, `.xls`), CSV (`.csv`), JSON (`.json`), serta teks/catatan bebas (`.txt`, `.tsv`, `.log`, `.md`) dengan kolom:
 - `tanggal` (bisa tanggal tunggal `YYYY-MM-DD` atau rentang `YYYY-MM-DD - YYYY-MM-DD`)
 - `rencana_kinerja_keyword` (kata kunci pembeda butir SKP pengguna)
 - `kegiatan` (deskripsi pekerjaan)
