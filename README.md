@@ -26,6 +26,7 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 | File | Deskripsi |
 | :--- | :--- |
 | `auto_input_kegiatan.py` | Skrip utama untuk menjalankan otomasi input form kegiatan. |
+| `edit_kegiatan.py` | Skrip otomasi untuk mengedit/memperbarui butir kegiatan (misal update tautan bukti dukung, progres, capaian). |
 | `generate_kegiatan_from_rk.py` | Generator kegiatan otomatis dari butir SKP pengguna (bisa fetch otomatis atau manual). |
 | `gdrive_uploader.py` | Modul pengunggah otomatis file bukti dukung lokal ke Google Drive. |
 | `daftar_kegiatan_template.json` | Template data kegiatan berformat JSON. |
@@ -81,3 +82,7 @@ Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup 
 
 #### 🔹 7. Input Kegiatan Langsung Lewat Chat (Tanpa File)
 > *"Tolong catat kegiatan ke KIPApp tanggal 15–19 Juni 2026: 'Pelaksanaan pengawasan survei ekonomi di lapangan' untuk butir SKP pengolahan dengan progres 100%."*
+
+#### 🔹 8. Edit / Pembaruan Massal Butir Realisasi (Update Bukti Dukung ke Google Drive)
+> *"Tolong tambahkan/update semua bukti dukung kegiatan di Triwulan II ke URL folder Google Drive: https://drive.google.com/drive/folders/1c2MxKHbq3jse08vTIZs0o9lw2cjLvK5Y?usp=sharing"*
+> *(Atau: "Lengkapi bukti dukung yang masih kosong saja di Triwulan II dengan link Drive https://drive.google.com/...")*

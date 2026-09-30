@@ -162,4 +162,14 @@ Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Antigravity, Open
   2. Petakan ke butir SKP KIPApp.
   3. Inputkan ke KIPApp menggunakan `auto_input_kegiatan.py`.
 
+### Skenario 8: Edit / Pembaruan Massal Butir Realisasi (Update Bukti Dukung ke Google Drive)
+- **Prompt Contoh**: *"Tolong tambahkan semua bukti dukung di Triwulan II ke URL folder Google Drive: https://drive.google.com/..."*
+- **Tindakan Agent**:
+  1. Jalankan `edit_kegiatan.py` dengan parameter periode dan URL Google Drive yang diminta:
+     ```bash
+     uv run python edit_kegiatan.py --periode "<PERIODE>" --drive-url "<URL_DRIVE>" --all
+     ```
+  2. Jika pengguna meminta hanya kegiatan yang belum punya bukti: tambahkan flag `--only-empty-bukti`.
+  3. Laporkan jumlah kegiatan yang berhasil diperbarui kepada pengguna.
+
 

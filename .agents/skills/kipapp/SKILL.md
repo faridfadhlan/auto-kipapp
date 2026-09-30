@@ -117,6 +117,21 @@ Jika pengguna meminta *"buatkan kegiatan dari SKP saya"*:
   uv run python auto_input_kegiatan.py --file <PATH_FILE> --periode "<PERIODE>" --drive-url "<URL_DRIVE>"
   ```
 
+### 5. Edit / Pembaruan Massal Realisasi Kegiatan (`edit_kegiatan.py`)
+Mendukung pembaruan tautan bukti dukung, progres, capaian, dan centang SKP untuk kegiatan yang sudah ada di KIPApp:
+- **Update Semua Bukti Dukung di Triwulan Tertentu**:
+  ```bash
+  uv run python edit_kegiatan.py --periode "<PERIODE>" --drive-url "<URL_GOOGLE_DRIVE>" --all
+  ```
+- **Update HANYA yang Belum Punya Bukti**:
+  ```bash
+  uv run python edit_kegiatan.py --periode "<PERIODE>" --drive-url "<URL_GOOGLE_DRIVE>" --only-empty-bukti
+  ```
+- **Filter Berdasarkan Kata Kunci Kegiatan atau Tanggal**:
+  ```bash
+  uv run python edit_kegiatan.py --periode "<PERIODE>" --drive-url "<URL_GOOGLE_DRIVE>" -k "publikasi"
+  ```
+
 ---
 
 ## 🔍 Mekanisme Pencocokan Dropdown Rencana Kinerja
