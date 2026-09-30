@@ -27,6 +27,7 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 | :--- | :--- |
 | `auto_input_kegiatan.py` | Skrip utama untuk menjalankan otomasi input form kegiatan. |
 | `generate_kegiatan_from_rk.py` | Generator kegiatan otomatis dari butir SKP pengguna (bisa fetch otomatis atau manual). |
+| `gdrive_uploader.py` | Modul pengunggah otomatis file bukti dukung lokal ke Google Drive. |
 | `daftar_kegiatan_template.json` | Template data kegiatan berformat JSON. |
 | `launch_login.py` | Skrip untuk membuka browser dan login manual pertama kali jika sesi kedaluwarsa. |
 | `browser_data/` | Direktori penyimpanan profil browser & cookies (aman dan diabaikan oleh git). |
@@ -86,7 +87,15 @@ uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SK
 - `Rencana Kinerja` (kata kunci pembeda butir SKP Anda, misal: `pengolahan`, `keuangan`, `publikasi`)
 - `Capaian` (opsional, jika kosong disamakan dengan kegiatan)
 - `Progres` (angka persentase, default: 100)
-- `Bukti Dukung` (opsional, link Google Drive)
+- `Bukti Dukung` (opsional: link bebas web/Drive atau path file fisik lokal seperti `laporan.pdf`, `foto.jpg`)
+
+> [!TIP]
+> **Upload Otomatis File Lokal ke Google Drive**: Jika kolom `Bukti Dukung` diisi path file lokal, skrip akan otomatis mengupload file tersebut ke Google Drive melalui Google Drive API, membuat hak aksesnya dapat dilihat publik, dan menyisipkan link `webViewLink` ke KIPApp.
+>
+> **Konfigurasi Kredensial Google API:**
+> 1. Salin `.env.example` menjadi `.env`.
+> 2. Letakkan file kunci Google Cloud: `service_account.json` (Service Account) atau `credentials.json` (OAuth Client) di direktori proyek Anda atau di `~/.kipapp/`.
+> 3. (Opsional) Masukkan ID Folder Drive tujuan pada `GDRIVE_FOLDER_ID`.
 
 ---
 

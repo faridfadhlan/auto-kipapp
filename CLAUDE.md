@@ -42,5 +42,9 @@ Mendukung file Excel (`.xlsx`, `.xls`), CSV (`.csv`), dan JSON (`.json`) dengan 
 - `kegiatan` (deskripsi pekerjaan)
 - `progres` (default 100)
 - `capaian` (opsional, disamakan dengan kegiatan jika kosong)
-- `link_dukung` (opsional, link Google Drive)
+- `link_dukung` (opsional: URL bebas atau path file lokal yang otomatis diupload ke Google Drive)
 - `masuk_capaian_skp` (boolean, default false)
+
+## Integrasi Google Drive
+- Jika bukti dukung berupa file lokal, sistem otomatis menguploadnya ke Google Drive dan menyisipkan link publiknya.
+- Kredensial Google: Simpan `service_account.json` (Service Account) atau `credentials.json` (OAuth) di folder proyek atau `~/.kipapp/`, atau konfigurasikan file `.env`.

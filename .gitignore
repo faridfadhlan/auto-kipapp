@@ -10,6 +10,14 @@ browser_data/
 # Environment files
 .env
 .env.*
+!.env.example
+
+# Google Drive API credentials & tokens (DO NOT COMMIT)
+credentials*.json
+token.json
+service_account*.json
+client_secrets*.json
+gdrive_credentials*.json
 
 # Logs & temp files
 *.log

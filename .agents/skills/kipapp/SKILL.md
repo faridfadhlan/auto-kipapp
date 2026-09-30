@@ -93,8 +93,16 @@ Jika pengguna meminta *"buatkan kegiatan dari SKP saya"*:
   - Skrip otomatis mencentang opsi *"Gunakan periode tanggal"* di formulir KIPApp dan mengisi rentang kalender.
 - **JSON**: Mengikuti struktur `daftar_kegiatan_template.json`.
 
-### 3. Pengisian Otomatis Bukti Dukung Google Drive
-- Mendukung flag `--drive-url "<URL_FOLDER_DRIVE>"` untuk mengisi link bukti dukung pada form secara serentak jika kolom bukti dukung per kegiatan kosong.
+### 3. Pengisian Fleksibel Bukti Dukung (Link Web / Drive / Upload File Otomatis)
+- **Link Bebas**: Kolom bukti dukung dapat berupa URL apa pun (link folder Google Drive, link file, atau tautan web internal).
+- **Upload File Lokal Otomatis ke Google Drive**:
+  - Jika bukti dukung berupa path file lokal (misal: `laporan.pdf`, `foto_kegiatan.jpg`, `notulen.docx`), skrip otomatis mengupload file tersebut ke Google Drive via Google Drive API.
+  - Akses file otomatis disetel ke publik (`anyone with link can view`), lalu tautan Google Drive (`webViewLink`) disisipkan ke form KIPApp.
+  - Parameter opsional: `--gdrive-folder-id "<ID_FOLDER>"` untuk mengarahkan upload ke folder Drive tertentu.
+- **Konfigurasi Kredensial Google Drive**:
+  - Letakkan `service_account.json` (Google Cloud Service Account, direkomendasikan) atau `credentials.json` (OAuth Desktop App) di folder proyek atau di `~/.kipapp/`.
+  - Atau konfigurasikan path-nya di file `.env` (contoh tersedia di `.env.example`).
+- **Default Link Drive Global**: Mendukung flag `--drive-url "<URL_FOLDER_DRIVE>"` sebagai fallback jika kolom bukti dukung kosong.
 
 ### 4. Mode Eksekusi
 - **Dry-Run (Preview Tanpa Save)**:

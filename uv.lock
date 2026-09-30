@@ -176,6 +176,9 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "browser-use" },
+    { name = "google-api-python-client" },
+    { name = "google-auth-httplib2" },
+    { name = "google-auth-oauthlib" },
     { name = "openpyxl" },
     { name = "pandas" },
     { name = "playwright" },
@@ -185,6 +188,9 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "browser-use", specifier = ">=0.13.10" },
+    { name = "google-api-python-client", specifier = ">=2.100.0" },
+    { name = "google-auth-httplib2", specifier = ">=0.2.0" },
+    { name = "google-auth-oauthlib", specifier = ">=1.2.0" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.0.6" },
     { name = "playwright", specifier = ">=1.63.0" },

@@ -95,5 +95,16 @@ uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triw
 - `kegiatan`: Deskripsi aktivitas kerja yang dilaksanakan.
 - `progres`: Angka persentase (default: 100).
 - `capaian`: Output hasil kegiatan (opsional, disamakan dengan kegiatan jika kosong).
-- `link_dukung`: Tautan folder/file bukti dukung di Google Drive.
+- `link_dukung`: Tautan bukti dukung bebas (URL web/drive) ATAU path file lokal (misal: `laporan.pdf`, `foto.jpg`). Jika berupa file lokal, sistem otomatis menguploadnya ke Google Drive dan menyisipkan link publiknya.
 - `masuk_capaian_skp`: Boolean (`true`/`false`).
+
+---
+
+## ☁️ Integrasi Google Drive (Upload File Bukti Dukung)
+
+- **Upload Otomatis**: Jika pengguna memberikan file fisik lokal sebagai bukti dukung, `gdrive_uploader.py` otomatis menguploadnya ke Google Drive via Google Drive API dan mengembalikan link publik (`webViewLink`).
+- **Kredensial Google API**:
+  - Letakkan `service_account.json` (Google Cloud Service Account) atau `credentials.json` (OAuth Client ID) di folder proyek atau di `~/.kipapp/`.
+  - Dapat juga diset via `.env` (lihat `.env.example`).
+  - Target folder ID dapat diset via `--gdrive-folder-id "<ID_FOLDER>"` atau `GDRIVE_FOLDER_ID` di `.env`.
+

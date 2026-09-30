@@ -100,7 +100,7 @@ def normalize_periode(periode_str: str) -> str:
         return "Tahunan"
     return periode_str
 
-def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", browser_data: str = "", dry_run: bool = False):
+def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", gdrive_folder_id: str = "", browser_data: str = "", dry_run: bool = False):
     activities_file = Path(file_path)
     if not activities_file.exists():
         print(f"[ERROR] File kegiatan {file_path} tidak ditemukan!")
@@ -272,8 +272,21 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
             modal.locator("textarea[placeholder*='Capaian']").first.fill(capaian_text)
             time.sleep(0.3)
 
-            # 6. Input Data Dukung jika ada
-            link_dukung = item.get("link_dukung", "").strip() or default_drive_url.strip()
+            # 6. Input Data Dukung (bebas: link drive/web atau file lokal yang otomatis diupload)
+            raw_dukung = item.get("link_dukung", "").strip() or default_drive_url.strip()
+            link_dukung = ""
+            if raw_dukung:
+                if raw_dukung.startswith("http://") or raw_dukung.startswith("https://"):
+                    link_dukung = raw_dukung
+                else:
+                    # Input berupa file lokal -> upload ke Google Drive
+                    try:
+                        from gdrive_uploader import upload_file_to_drive
+                        link_dukung = upload_file_to_drive(raw_dukung, folder_id=gdrive_folder_id)
+                    except Exception as upload_err:
+                        print(f"  [WARNING] Gagal mengupload file bukti dukung ke Google Drive: {upload_err}")
+                        link_dukung = raw_dukung
+
             if link_dukung:
                 print(f"  Bukti Dukung: {link_dukung}")
                 modal.locator("input[placeholder*='Data Dukung']").first.fill(link_dukung)
@@ -318,8 +331,9 @@ if __name__ == "__main__":
     parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', 'TW IV')")
     parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")
+    parser.add_argument("--gdrive-folder-id", default="", help="ID Folder Google Drive tujuan jika bukti dukung berupa file lokal")
     parser.add_argument("--browser-data", default="", help="Lokasi kustom direktori browser_data (opsional)")
     parser.add_argument("--dry-run", action="store_true", help="Uji coba pengisian form tanpa mengklik Save")
     args = parser.parse_args()
 
-    input_kegiatan(args.file, args.periode, tahun=args.tahun, default_drive_url=args.drive_url, browser_data=args.browser_data, dry_run=args.dry_run)
+    input_kegiatan(args.file, args.periode, tahun=args.tahun, default_drive_url=args.drive_url, gdrive_folder_id=args.gdrive_folder_id, browser_data=args.browser_data, dry_run=args.dry_run)
