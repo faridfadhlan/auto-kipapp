@@ -87,3 +87,50 @@ Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup 
 #### 🔹 8. Edit / Pembaruan Massal Butir Realisasi (Update Bukti Dukung ke Google Drive)
 > *"Tolong tambahkan/update semua bukti dukung kegiatan di Triwulan II ke URL folder Google Drive: https://drive.google.com/drive/folders/<ID_FOLDER_GOOGLE_DRIVE>"*
 > *(Atau: "Lengkapi bukti dukung yang masih kosong saja di Triwulan II dengan link Drive https://drive.google.com/drive/folders/...")*
+
+---
+
+## ☁️ Integrasi Google Drive (Auto-Upload Bukti Dukung)
+
+Aplikasi ini mendukung **pengunggahan otomatis file bukti fisik lokal** (seperti `laporan.pdf`, `foto_kegiatan.jpg`, `notulen.docx`, dll.) langsung ke Google Drive Anda melalui Google Drive API.
+
+### 🔄 Cara Kerja:
+1. Saat Anda mengisi kolom bukti dukung dengan path file lokal di komputer Anda, sistem otomatis mengunggah file tersebut ke Google Drive.
+2. Hak akses file di Google Drive otomatis diatur ke publik (*Anyone with the link can view*).
+3. Tautan publik (`webViewLink`) langsung disisipkan ke dalam isian formulir KIPApp BPS.
+
+---
+
+### ⚙️ Langkah Konfigurasi (Pilih Salah Satu):
+
+#### Opsi 1: Google Service Account (Paling Praktis & Tanpa Pop-up Login)
+1. Buka [Google Cloud Console](https://console.cloud.google.com/), buat project baru (atau gunakan yang sudah ada), lalu aktifkan **Google Drive API**.
+2. Buat **Service Account** di menu *IAM & Admin* > *Service Accounts*.
+3. Buat dan unduh kunci privat JSON (*Create key* > *JSON*).
+4. Simpan file tersebut di folder proyek Anda dengan nama `service_account.json` (atau di direktori global `~/.kipapp/service_account.json`).
+5. **Penting**: Buka folder Google Drive tempat Anda ingin menyimpan file bukti, klik **Bagikan (Share)**, lalu masukkan alamat email Service Account Anda sebagai **Editor**.
+
+#### Opsi 2: Google OAuth 2.0 Client (Desktop App)
+1. Di Google Cloud Console, buka menu *APIs & Services* > *Credentials*.
+2. Buat kredensial bertipe **OAuth client ID** dengan jenis aplikasi **Desktop App**.
+3. Unduh file kredensial JSON dan simpan di folder proyek dengan nama `credentials.json` (atau di `~/.kipapp/credentials.json`).
+4. Pada proses upload pertama kali, browser akan membuka jendela persetujuan izin akses Google Drive sekali saja.
+
+---
+
+### 📁 Menentukan Folder Google Drive Tujuan (`.env`):
+1. Salin template konfigurasi:
+   ```bash
+   cp .env.example .env
+   ```
+2. Salin ID folder dari tautan Google Drive Anda:
+   - Contoh URL: `https://drive.google.com/drive/folders/1aBcDeFgHiJkLmNoPqRsTuVwXyZ`
+   - Maka ID-nya adalah: `1aBcDeFgHiJkLmNoPqRsTuVwXyZ`
+3. Masukkan ID tersebut ke dalam file `.env`:
+   ```env
+   GDRIVE_FOLDER_ID=1aBcDeFgHiJkLmNoPqRsTuVwXyZ
+   ```
+*(Jika dikosongkan, file akan otomatis diunggah ke root My Drive).*
+
+> [!NOTE]
+> File kredensial (`service_account*.json`, `credentials*.json`, token, dan `.env`) sudah otomatis terdaftar di `.gitignore` untuk mencegah kebocoran data sensitif ke publik.
