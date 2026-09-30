@@ -199,11 +199,11 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
             if rk_keyword:
                 modal.locator(".ant-select:has-text('Pilih rencana kinerja SKP')").first.click()
                 time.sleep(1.2)
-                rk_opt = page.locator(f".ant-select-dropdown:not(.ant-select-dropdown-hidden) li:has-text('{rk_keyword}')").first
+                rk_opt = page.locator(f".ant-select-dropdown:not(.ant-select-dropdown-hidden) li.ant-select-dropdown-menu-item:not(.ant-select-dropdown-menu-item-group):has-text('{rk_keyword}')").first
                 if rk_opt.is_visible():
                     rk_opt.click(force=True)
                 else:
-                    page.locator(f".ant-select-dropdown li:has-text('{rk_keyword}')").last.click(force=True)
+                    page.locator(f".ant-select-dropdown li.ant-select-dropdown-menu-item:not(.ant-select-dropdown-menu-item-group):has-text('{rk_keyword}')").last.click(force=True)
                 time.sleep(1)
 
             # 2. Input Tanggal (Single atau Range)

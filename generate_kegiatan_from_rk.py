@@ -205,7 +205,7 @@ def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II", tahun: str 
         modal.locator(".ant-select:has-text('Pilih rencana kinerja SKP')").first.click(force=True)
         time.sleep(1)
         
-        raw_options = page.locator(".ant-select-dropdown:not(.ant-select-dropdown-hidden) li").all_text_contents()
+        raw_options = page.locator(".ant-select-dropdown:not(.ant-select-dropdown-hidden) li.ant-select-dropdown-menu-item:not(.ant-select-dropdown-menu-item-group)").all_text_contents()
         modal.locator("button:has-text('Cancel')").first.click()
         ctx.close()
         

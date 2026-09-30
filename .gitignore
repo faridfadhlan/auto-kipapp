@@ -32,7 +32,7 @@ captured_*.json
 plans_*.json
 existing_*.json
 test_*.json
-kegiatan_auto_generated.json
+kegiatan_*.json
 *.xlsx
 *.csv
 !daftar_kegiatan_template.json
