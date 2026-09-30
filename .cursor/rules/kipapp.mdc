@@ -1,0 +1,28 @@
+---
+description: Panduan otomasi KIPApp BPS untuk input kegiatan harian, penarikan SKP dinamis, dan bukti dukung
+globs: *
+alwaysApply: true
+---
+
+# KIPApp BPS Automation Guide for Cursor
+
+## Tugas Utama
+Membantu pengguna mengelola dan mengotomasi pengisian formulir catatan kegiatan harian di KIPApp BPS (`https://kipapp.bps.go.id`).
+
+## Pedoman Operasional
+- **Privasi Kredensial**: Dilarang menyertakan token, cookies SSO, NIP pegawai, atau folder `browser_data/` dalam commit Git.
+- **Direktori Proyek Dinamis**: Gunakan root workspace aktif saat ini untuk membaca file input (`.xlsx`, `.csv`, `.json`) dan menyimpan file output.
+- **Rencana Kinerja (SKP) Dinamis**: Butir SKP pegawai berbeda-beda. Gunakan `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` untuk menarik daftar SKP aktif pengguna, atau sesuaikan dengan input teks dari pengguna.
+- **Penyesuaian Triwulan & Tanggal**: Deteksi otomatis periode Triwulan (I, II, III, IV) dan tahun dari prompt. Hanya gunakan hari kerja efektif (Senin–Jumat).
+
+## Perintah Eksekusi
+```bash
+# Tarik SKP dan buat kegiatan otomatis
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II"
+
+# Preview pengisian form (Dry Run)
+uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --dry-run
+
+# Input form langsung (Live Save)
+uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --drive-url "https://drive.google.com/..."
+```

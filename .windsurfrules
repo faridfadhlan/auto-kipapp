@@ -1,0 +1,15 @@
+# Windsurf Rules — Otomasi KIPApp BPS
+
+## Konteks Proyek
+Aplikasi otomasi berbasis Playwright untuk mencatat dan menginput kegiatan harian pegawai ke KIPApp BPS (https://kipapp.bps.go.id).
+
+## Aturan Agen Cascade
+- **Privasi**: Dilarang mengekspos NIP, token sesi JWT, kredensial, atau folder `browser_data/`.
+- **Lokasi Kerja**: Operasikan selalu dari direktori proyek aktif pengguna saat ini (`cwd`).
+- **SKP Dinamis**: Sesuaikan butir Rencana Kinerja secara dinamis per pegawai (gunakan `--fetch-rk` atau input pengguna).
+- **Periode Triwulan**: Sesuaikan otomatis Triwulan I, II, III, IV dan tahun anggaran dari prompt.
+
+## Perintah Penting
+- Buka login: `uv run python launch_login.py`
+- Generate kegiatan: `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"`
+- Input kegiatan: `uv run python auto_input_kegiatan.py --file <FILE> --periode "<PERIODE>" --drive-url "<URL>"`

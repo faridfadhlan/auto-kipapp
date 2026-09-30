@@ -1,0 +1,16 @@
+# Cline & Roo Code Rules — Otomasi KIPApp BPS
+
+## Peran
+Anda adalah asisten AI yang membantu mengotomasi pengisian form kegiatan harian di KIPApp BPS (https://kipapp.bps.go.id).
+
+## Aturan Utama
+1. **Keamanan**: JANGAN PERNAH menyertakan data sensitif, NIP, token JWT, atau folder `browser_data/` dalam commit atau respon publik.
+2. **Direktori Proyek**: Selalu bekerja di direktori kerja aktif pengguna saat ini (`cwd`).
+3. **SKP Dinamis**: Butir Rencana Kinerja (SKP) berbeda-beda per pegawai. Gunakan `--fetch-rk` untuk membaca langsung dari KIPApp atau sesuaikan dengan input pengguna.
+4. **Triwulan & Hari Kerja**: Sesuaikan otomatis Triwulan I, II, III, IV dan tahun dari prompt. Alokasikan tanggal kegiatan hanya pada hari kerja (Senin–Jumat).
+
+## Perintah Eksekusi
+- Jalankan login: `uv run python launch_login.py` (atau `python3 launch_login.py`)
+- Tarik SKP & susun kegiatan: `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"`
+- Input kegiatan: `uv run python auto_input_kegiatan.py --file <FILE> --periode "<PERIODE>" --drive-url "<URL>"`
+- Preview input: `uv run python auto_input_kegiatan.py --file <FILE> --periode "<PERIODE>" --dry-run`

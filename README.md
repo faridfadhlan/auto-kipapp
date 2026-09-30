@@ -30,7 +30,27 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 | `daftar_kegiatan_template.json` | Template data kegiatan berformat JSON. |
 | `launch_login.py` | Skrip untuk membuka browser dan login manual pertama kali jika sesi kedaluwarsa. |
 | `browser_data/` | Direktori penyimpanan profil browser & cookies (aman dan diabaikan oleh git). |
+| `AGENTS.md` | Panduan standar instruksi universal untuk semua agent AI. |
+| `CLAUDE.md` | Konfigurasi bawaan untuk Claude Code CLI. |
+| `.cursorrules` & `.cursor/` | Aturan bawaan untuk Cursor IDE (format MDC & legacy). |
+| `.github/copilot-instructions.md`| Instruksi workspace untuk GitHub Copilot. |
+| `.windsurfrules` | Aturan bawaan untuk Windsurf IDE (Cascade). |
+| `.clinerules` | Aturan bawaan untuk Cline dan Roo Code. |
 | `.agents/skills/kipapp/SKILL.md` | Definisi skill Antigravity untuk agen. |
+
+---
+
+## 🤖 Kompatibilitas Multi-Agent AI Coding
+
+Skill dan otomasi ini langsung dikenali secara otomatis tanpa konfigurasi manual tambahan di berbagai platform AI coding agent:
+
+- **Google Antigravity**: Membaca `.agents/skills/kipapp/SKILL.md` atau `~/.gemini/config/skills/kipapp/`.
+- **Claude Code**: Membaca `CLAUDE.md`.
+- **Cursor IDE**: Membaca `.cursorrules` dan `.cursor/rules/kipapp.mdc`.
+- **GitHub Copilot**: Membaca `.github/copilot-instructions.md`.
+- **Windsurf IDE**: Membaca `.windsurfrules`.
+- **Cline & Roo Code**: Membaca `.clinerules`.
+- **OpenHands / Devin / Standard LLM**: Membaca `AGENTS.md`.
 
 ---
 
