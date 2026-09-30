@@ -112,10 +112,21 @@ uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --perio
 uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --drive-url "https://drive.google.com/..."
 ```
 
----
+### 4. Melalui Chat Agent AI Coding (Universal untuk Semua Agent)
 
-### 4. Melalui Obrolan Antigravity (Paling Praktis)
-Jika Anda menggunakan asisten AI Antigravity, cukup katakan:
-> *"Tolong buatkan kegiatan untuk Triwulan II dari butir SKP saya dan langsung inputkan ke KIPApp dengan link bukti dukung https://drive.google.com/..."*
+Anda dapat langsung memberikan perintah menggunakan bahasa sehari-hari di jendela obrolan agent AI coding pilihan Anda (**Claude Code, Cursor, GitHub Copilot, Windsurf, Cline / Roo Code, Google Antigravity, OpenHands/Devin**, dll.). Agent akan otomatis membaca panduan proyek dan mengeksekusi perintah yang sesuai:
 
-Agen akan secara otomatis mengaktifkan skill **`kipapp`**, mengambil butir SKP Anda, merancang kegiatan harian yang sesuai, dan memprosesnya.
+#### 🔹 Skenario A: Auto-Generate Kegiatan dari SKP
+> *"Tolong buatkan kegiatan SKP untuk Triwulan II tahun 2026 dari akun KIPApp saya dan sebarkan ke hari kerja efektif."*
+
+#### 🔹 Skenario B: Input dari File (Excel / CSV / JSON)
+> *"Inputkan file kegiatan_juni.xlsx ke KIPApp periode Triwulan II dengan link folder bukti dukung https://drive.google.com/..."*
+
+#### 🔹 Skenario C: Upload File Fisik Lokal Otomatis ke Google Drive
+> *"Tolong inputkan kegiatan dari file capaian.xlsx ke KIPApp. Jika kolom bukti dukung memuat file PDF/foto lokal, upload otomatis ke Google Drive saya."*
+
+#### 🔹 Skenario D: Uji Coba Pengisian (Dry-Run Preview)
+> *"Coba simulasikan pengisian KIPApp untuk file kegiatan.json dengan mode dry-run, jangan klik simpan dulu."*
+
+#### 🔹 Skenario E: Input Kegiatan Langsung Lewat Chat (Tanpa File)
+> *"Tolong catat kegiatan ke KIPApp tanggal 15–19 Juni 2026: 'Pelaksanaan pengawasan survei ekonomi di lapangan' untuk butir SKP pengolahan dengan progres 100%."*

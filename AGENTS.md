@@ -108,3 +108,41 @@ uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triw
   - Dapat juga diset via `.env` (lihat `.env.example`).
   - Target folder ID dapat diset via `--gdrive-folder-id "<ID_FOLDER>"` atau `GDRIVE_FOLDER_ID` di `.env`.
 
+---
+
+## 💬 Pola Permintaan Pengguna & Respon Agent (Semua Agent Coding)
+
+Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Antigravity, OpenHands, dll.) harus merespon prompt pengguna dengan alur kerja berikut:
+
+### Skenario 1: Permintaan Auto-Generate dari SKP
+- **Prompt Contoh**: *"Buatkan kegiatan SKP Triwulan II 2026 dari akun KIPApp saya"*
+- **Tindakan Agent**:
+  1. Jalankan `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II" --tahun 2026`.
+  2. Laporkan daftar kegiatan yang berhasil digenerate kepada pengguna.
+  3. Tanyakan atau tawarkan apakah ingin langsung diinputkan ke KIPApp.
+
+### Skenario 2: Permintaan Input dari File (Excel/CSV/JSON)
+- **Prompt Contoh**: *"Inputkan file kegiatan_juni.xlsx ke KIPApp Triwulan II, link bukti dukung https://drive.google.com/..."*
+- **Tindakan Agent**:
+  1. Jalankan `uv run python auto_input_kegiatan.py --file kegiatan_juni.xlsx --periode "Triwulan II" --drive-url "<URL>"`.
+  2. Laporkan status jumlah kegiatan yang berhasil disimpan.
+
+### Skenario 3: Input dengan File Bukti Dukung Lokal
+- **Prompt Contoh**: *"Inputkan data dari capaian.csv. File bukti dukung ada di folder dokumen/ (upload ke Google Drive saya)"*
+- **Tindakan Agent**:
+  1. Jalankan `auto_input_kegiatan.py` dengan file tersebut.
+  2. Sistem otomatis mengupload file fisik lokal ke Google Drive dan menyisipkan tautan publiknya ke formulir.
+
+### Skenario 4: Simulasi / Preview (Dry Run)
+- **Prompt Contoh**: *"Coba test input dulu tanpa simpan (preview)"*
+- **Tindakan Agent**:
+  1. Tambahkan flag `--dry-run` pada perintah eksekusi.
+  2. Beritahukan kepada pengguna lokasi file screenshot preview (`preview_kegiatan_*.png`).
+
+### Skenario 5: Permintaan Pencatatan Kegiatan Langsung dari Chat
+- **Prompt Contoh**: *"Catat kegiatan tanggal 29 Juni 2026: Evaluasi pendataan SE2026 untuk SKP pengolahan"*
+- **Tindakan Agent**:
+  1. Buat file JSON sementara berisi kegiatan tersebut.
+  2. Jalankan `auto_input_kegiatan.py` dengan file JSON tersebut.
+
+
