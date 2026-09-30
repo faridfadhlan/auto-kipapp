@@ -12,7 +12,7 @@ Otomasi pengisian catatan kegiatan harian pegawai BPS ke sistem KIPApp menggunak
 
 ## Fleksibilitas Proyek
 - **Direktori Proyek**: Bekerja selalu di direktori kerja aktif pengguna saat ini (`cwd`). Jangan asumsikan folder harus bernama tertentu.
-- **Rencana Kinerja (SKP)**: Bersifat dinamis per pegawai (Sosial, Distribusi, Produksi, Nerwilis, IPDS, Umum/TU, Fungsional, dll.). Jangan gunakan daftar statis.
+- **Rencana Kinerja (SKP)**: Bersifat dinamis per pegawai (Sosial, Distribusi, Produksi, Nerwilis, IPDS, Umum/TU, Fungsional, dll.). Jangan gunakan daftar statis. Khusus kegiatan terkait entri dokumen, tabulasi, export, atau backup data, WAJIB dipetakan ke butir Rencana Kinerja terkait **pengolahan**.
 - **Triwulan & Tahun**: Tangani triwulan (`Triwulan I`, `Triwulan II`, `Triwulan III`, `Triwulan IV`, `Tahunan`) dan tahun anggaran secara otomatis sesuai prompt pengguna. Tanggal kerja disebarkan ke hari kerja Senin–Jumat.
 
 ## Perintah Utama

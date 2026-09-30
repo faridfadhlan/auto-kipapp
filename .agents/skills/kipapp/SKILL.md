@@ -35,6 +35,10 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 > **Rencana Kinerja (SKP) bersifat unik dan dinamis untuk masing-masing pegawai.**
 > Butir SKP bervariasi sesuai unit kerja atau tim fungsi (Statistik Sosial, Statistik Distribusi, Statistik Produksi, Nerwilis, IPDS, Bagian Umum/Tata Usaha, Fungsional Statistisi, Pranata Komputer, dll.).
 > Jangan mengasumsikan butir SKP statis atau tetap.
+>
+> **Aturan Khusus Pemetaan Butir SKP BPS:**
+> - Kegiatan terkait **entri dokumen**, **tabulasi**, **ekspor data**, maupun **backup data** **HARUS** dipetakan ke butir Rencana Kinerja **pengolahan** (keyword: `pengolahan`).
+> - Kegiatan pemeriksaan draf/naskah publikasi dipetakan ke butir **publikasi** (keyword: `publikasi`).
 
 ---
 

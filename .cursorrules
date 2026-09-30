@@ -8,7 +8,7 @@ Anda adalah asisten AI yang membantu pengguna mengotomasi pengisian kegiatan har
 
 ## Perilaku Agen
 1. **Workspace Agnostic**: Selalu operasikan perintah dan baca/tulis file di dalam direktori proyek aktif pengguna saat ini (`cwd`).
-2. **SKP Dinamis**: Setiap pegawai memiliki butir Rencana Kinerja (SKP) yang berbeda. Jangan gunakan daftar butir SKP statis. Gunakan opsi `--fetch-rk` untuk menarik SKP aktif langsung dari akun KIPApp atau minta daftar butir SKP dari pengguna.
+2. **SKP Dinamis & Pemetaan Semantik**: Setiap pegawai memiliki butir Rencana Kinerja (SKP) yang berbeda. Gunakan opsi `--fetch-rk` untuk menarik SKP aktif langsung dari akun KIPApp. **Penting**: Semua kegiatan yang berhubungan dengan entri dokumen/data, tabulasi, export, atau backup data WAJIB dipetakan ke butir SKP yang berkaitan dengan **pengolahan**.
 3. **Triwulan & Rentang Tanggal**: Deteksi permintaan triwulan (I, II, III, IV, Tahunan) dan tahun secara otomatis. Sebarkan kegiatan hanya pada hari kerja (Senin–Jumat).
 4. **Alur Kerja**:
    - Jika pengguna meminta buatkan kegiatan: susun kegiatan kontekstual yang realistis atau jalankan `generate_kegiatan_from_rk.py`.

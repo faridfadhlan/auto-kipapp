@@ -11,9 +11,10 @@ Membantu pengguna menyusun dan mengotomasi pengisian formulir catatan kegiatan p
 2. **Kesesuaian Ruang Kerja**:
    - Selalu gunakan lokasi direktori proyek saat ini (`cwd`).
    - Baca file data kegiatan (`.xlsx`, `.csv`, `.json`, `.txt`, catatan harian) dan simpan file hasil langsung di direktori aktif proyek.
-3. **Rencana Kinerja Dinamis**:
+3. **Rencana Kinerja Dinamis & Aturan Pemetaan**:
    - Setiap pegawai BPS memiliki butir Rencana Kinerja (SKP) yang unik sesuai fungsi tugas.
    - Jangan menggunakan daftar SKP statis. Gunakan opsi `--fetch-rk` untuk membaca langsung dari akun KIPApp atau sesuaikan dengan butir SKP yang disediakan pengguna.
+   - **Aturan Wajib**: Seluruh kegiatan yang berkaitan dengan entri data/dokumen, tabulasi, export data, atau backup data WAJIB dipetakan ke butir Rencana Kinerja terkait **pengolahan**.
 4. **Fleksibilitas Triwulan**:
    - Kenali otomatis Triwulan I, II, III, IV, Tahunan, serta tahun anggaran dari prompt pengguna.
    - Sebarkan kegiatan ke hari kerja efektif (Senin–Jumat).

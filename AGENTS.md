@@ -43,6 +43,12 @@ Aplikasi otomasi berbasis Playwright untuk mencatat, menyusun, dan menginput cap
   2. **Manual/File**: Terima butir SKP dari chat atau file pengguna via `--rk "Butir 1; Butir 2"` atau `--rk-file <FILE.json>`.
   3. **Penyusunan Berbasis AI**: Agent dapat merancang tahapan kegiatan kerja harian ASN (Persiapan, Pelaksanaan, Verifikasi, Pelaporan) yang kontekstual dan realistis berdasarkan kalimat SKP pengguna.
 
+### ⚠️ Aturan Penting Pemetaan Semantik Butir SKP:
+- **Entri Dokumen, Tabulasi, Export, Backup Data**:
+  Semua kegiatan yang berkaitan dengan **entri data/dokumen**, **tabulasi**, **ekspor/impor data**, atau **backup data**, **HARUS** dipetakan ke butir Rencana Kinerja (SKP) yang berkaitan dengan **pengolahan** (misal: *"Terlaksanakannya kegiatan pengolahan yang berkualitas dan tepat waktu"*, keyword: `pengolahan`), **BUKAN** ke butir survei lapangan, distribusi, atau tim lainnya.
+- **Publikasi**:
+  Kegiatan pemeriksaan tabel, naskah rilis, atau penyusunan buku publikasi dipetakan ke butir yang memuat kata kunci **publikasi**.
+
 ---
 
 ## 📅 Fleksibilitas Triwulan & Tahun
