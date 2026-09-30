@@ -57,76 +57,21 @@ Skill dan otomasi ini langsung dikenali secara otomatis tanpa konfigurasi manual
 
 ## 🚀 Cara Penggunaan
 
-### 1. Auto-Generate Kegiatan dari Butir SKP Anda
+Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup berikan instruksi menggunakan bahasa sehari-hari langsung di jendela obrolan agent AI coding Anda (**Google Antigravity, Claude Code, Cursor, GitHub Copilot, Windsurf, Cline / Roo Code, OpenHands/Devin**, dll.). Agent akan secara mandiri mengenali konteks, menyusun data kegiatan, dan mengeksekusi otomasi KIPApp.
 
-Skrip dan skill mendukung penyesuaian triwulan (`Triwulan I`, `Triwulan II`, `Triwulan III`, `Triwulan IV`, maupun `Tahunan`) serta tahun anggaran secara otomatis.
+### 💬 Contoh Perintah Chat ke Agent AI:
 
-**Opsi A — Tarik butir SKP otomatis dari akun KIPApp Anda:**
-```bash
-# Contoh untuk Triwulan I
-uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan I" --tahun 2026
-
-# Contoh untuk Triwulan III
-uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan III"
-```
-
-**Opsi B — Masukkan butir SKP kustom Anda sendiri:**
-```bash
-uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SKP 2" --periode "Triwulan III"
-```
-*(Hasilnya akan disimpan di `kegiatan_auto_generated.json` dengan rentang tanggal kerja efektif yang otomatis disesuaikan).*
-
----
-
-### 2. Input Kegiatan dari File (Excel / CSV / JSON)
-
-**Format Kolom Excel / CSV:**
-- `Tanggal` (contoh: `2026-06-02` atau rentang `2026-06-02 - 2026-06-05`)
-- `Tanggal Selesai` (opsional jika tanggal akhir di kolom terpisah)
-- `Kegiatan` (contoh: `Melakukan evaluasi hasil validasi data SE2026`)
-- `Rencana Kinerja` (kata kunci pembeda butir SKP Anda, misal: `pengolahan`, `keuangan`, `publikasi`)
-- `Capaian` (opsional, jika kosong disamakan dengan kegiatan)
-- `Progres` (angka persentase, default: 100)
-- `Bukti Dukung` (opsional: link bebas web/Drive atau path file fisik lokal seperti `laporan.pdf`, `foto.jpg`)
-
-> [!TIP]
-> **Upload Otomatis File Lokal ke Google Drive**: Jika kolom `Bukti Dukung` diisi path file lokal, skrip akan otomatis mengupload file tersebut ke Google Drive melalui Google Drive API, membuat hak aksesnya dapat dilihat publik, dan menyisipkan link `webViewLink` ke KIPApp.
->
-> **Konfigurasi Kredensial Google API:**
-> 1. Salin `.env.example` menjadi `.env`.
-> 2. Letakkan file kunci Google Cloud: `service_account.json` (Service Account) atau `credentials.json` (OAuth Client) di direktori proyek Anda atau di `~/.kipapp/`.
-> 3. (Opsional) Masukkan ID Folder Drive tujuan pada `GDRIVE_FOLDER_ID`.
-
----
-
-### 3. Eksekusi Pengisian Form KIPApp
-
-**Mode Dry-Run (Preview Tanpa Menyimpan):**
-```bash
-uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --dry-run
-```
-*(Screenshot review form akan tersimpan sebagai `preview_kegiatan_1.png`, dst.)*
-
-**Mode Live (Simpan Langsung ke KIPApp):**
-```bash
-uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --drive-url "https://drive.google.com/..."
-```
-
-### 4. Melalui Chat Agent AI Coding (Universal untuk Semua Agent)
-
-Anda dapat langsung memberikan perintah menggunakan bahasa sehari-hari di jendela obrolan agent AI coding pilihan Anda (**Claude Code, Cursor, GitHub Copilot, Windsurf, Cline / Roo Code, Google Antigravity, OpenHands/Devin**, dll.). Agent akan otomatis membaca panduan proyek dan mengeksekusi perintah yang sesuai:
-
-#### 🔹 Skenario A: Auto-Generate Kegiatan dari SKP
+#### 🔹 1. Auto-Generate Kegiatan dari Butir SKP Akun Anda
 > *"Tolong buatkan kegiatan SKP untuk Triwulan II tahun 2026 dari akun KIPApp saya dan sebarkan ke hari kerja efektif."*
 
-#### 🔹 Skenario B: Input dari File (Excel / CSV / JSON)
+#### 🔹 2. Input Kegiatan dari File (Excel / CSV / JSON)
 > *"Inputkan file kegiatan_juni.xlsx ke KIPApp periode Triwulan II dengan link folder bukti dukung https://drive.google.com/..."*
 
-#### 🔹 Skenario C: Upload File Fisik Lokal Otomatis ke Google Drive
+#### 🔹 3. Input dengan Bukti Dukung File Lokal (Auto-Upload ke Google Drive)
 > *"Tolong inputkan kegiatan dari file capaian.xlsx ke KIPApp. Jika kolom bukti dukung memuat file PDF/foto lokal, upload otomatis ke Google Drive saya."*
 
-#### 🔹 Skenario D: Uji Coba Pengisian (Dry-Run Preview)
+#### 🔹 4. Simulasi / Uji Coba Pengisian (Dry-Run Preview)
 > *"Coba simulasikan pengisian KIPApp untuk file kegiatan.json dengan mode dry-run, jangan klik simpan dulu."*
 
-#### 🔹 Skenario E: Input Kegiatan Langsung Lewat Chat (Tanpa File)
+#### 🔹 5. Input Kegiatan Langsung Lewat Chat (Tanpa File)
 > *"Tolong catat kegiatan ke KIPApp tanggal 15–19 Juni 2026: 'Pelaksanaan pengawasan survei ekonomi di lapangan' untuk butir SKP pengolahan dengan progres 100%."*
