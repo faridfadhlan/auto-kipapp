@@ -143,6 +143,32 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
         page.goto("https://kipapp.bps.go.id/#/pelaksanaan-aksi", wait_until="networkidle")
         time.sleep(2)
 
+        # Cek apakah sesi aktif atau butuh login
+        is_logged_in = False
+        for _ in range(4):
+            if page.locator(".ant-menu, a[href*='pelaksanaan-aksi'], button:has-text('Tambah')").count() > 0 and "login" not in page.url.lower():
+                is_logged_in = True
+                break
+            time.sleep(1)
+
+        if not is_logged_in or "login" in page.url.lower() or "sso" in page.url.lower() or page.locator("button:has-text('Login'), input[type='password']").count() > 0:
+            print("\n" + "=" * 65)
+            print(">>> ANDA BELUM LOGIN ATAU SESI KIPAPP TELAH BERAKHIR <<<")
+            print("Silakan lakukan login SSO BPS pada jendela browser yang terbuka.")
+            print("Sistem akan otomatis melanjutkan pengisian setelah Anda berhasil masuk...")
+            print("=" * 65 + "\n")
+            try:
+                page.wait_for_selector(".ant-menu, a[href*='pelaksanaan-aksi'], button:has-text('Tambah Kegiatan')", timeout=300000)
+                time.sleep(3)
+                if "#/pelaksanaan-aksi" not in page.url:
+                    page.goto("https://kipapp.bps.go.id/#/pelaksanaan-aksi", wait_until="networkidle")
+                    time.sleep(2)
+                print("Login berhasil terdeteksi! Melanjutkan proses otomasi...")
+            except Exception as login_err:
+                print(f"[ERROR] Batas waktu login (5 menit) terlampaui: {login_err}")
+                context.close()
+                return
+
         # Tutup modal notifikasi / tour jika ada
         page.evaluate("() => document.querySelectorAll('.ant-modal-wrap, .ant-modal-mask').forEach(e => e.remove())")
         time.sleep(1)
