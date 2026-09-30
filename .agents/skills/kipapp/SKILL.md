@@ -1,11 +1,11 @@
 ---
 name: kipapp
-description: Mengotomasi input catatan kegiatan harian di KIPApp BPS (https://kipapp.bps.go.id). Gunakan skill ini setiap kali pengguna meminta untuk menginput, mengecek, auto-generate dari rencana SKP, melengkapi bukti dukung Google Drive, atau submit kegiatan pekerjaan ke KIPApp BPS dari file (Excel/CSV/JSON) maupun teks langsung.
+description: Mengotomasi input catatan kegiatan harian di KIPApp BPS (https://kipapp.bps.go.id). Gunakan skill ini setiap kali pengguna meminta untuk menginput, mengecek, auto-generate dari rencana SKP pengguna, melengkapi bukti dukung Google Drive, atau submit kegiatan pekerjaan ke KIPApp BPS dari file (Excel/CSV/JSON) maupun teks langsung.
 ---
 
 # KIPApp BPS Automation Skill
 
-Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan bukti dukung, pembuatan otomatis dari rencana kinerja, dan pengiriman catatan kegiatan di **KIPApp BPS** (`https://kipapp.bps.go.id`).
+Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan bukti dukung, penyusunan kegiatan dinamis sesuai Rencana Kinerja (SKP) pengguna, dan pengiriman catatan kegiatan di **KIPApp BPS** (`https://kipapp.bps.go.id`).
 
 ---
 
@@ -17,29 +17,55 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 
 ---
 
-## 🚀 Kemampuan & Fitur Utama
+## 🎯 Fleksibilitas Rencana Kinerja (SKP Dinamis Per Pegawai)
 
-### 1. Auto-Generate Kegiatan dari Rencana Kinerja (SKP) yang Ada
-Jika pengguna meminta untuk *"mengisi/mengotomatiskan kegiatan dari daftar rencana yang sudah ada"*:
-- Agen dapat membaca butir SKP Utama yang terdaftar di KIPApp (misal 8 butir SKP Triwulan II: *Pengolahan*, *Perangkat & Jaringan*, *Pembinaan Statistik Sektoral*, *SBR*, *Kompetensi*, *Monitoring*, *Sistem Informasi*, *Publikasi*).
-- Jalankan skrip generator:
-  ```bash
-  uv run python generate_kegiatan_from_rk.py
-  ```
-- Skrip akan mendeteksi butir SKP yang masih 0 kegiatan dan menyusunkan daftar kegiatan pekerjaan harian yang realistis, membaginya ke hari kerja (Senin - Jumat) di periode tersebut, dan menyimpannya ke `kegiatan_auto_generated.json`.
-- Pengguna dapat me-review atau langsung diinput ke KIPApp.
+> [!IMPORTANT]
+> **Rencana Kinerja (SKP) bersifat unik dan dinamis untuk masing-masing pegawai.**
+> Butir SKP bervariasi sesuai unit kerja atau tim fungsi (Statistik Sosial, Statistik Distribusi, Statistik Produksi, Nerwilis, IPDS, Bagian Umum/Tata Usaha, Fungsional Statistisi, Pranata Komputer, dll.).
+> Jangan mengasumsikan butir SKP statis atau tetap.
+
+### Cara Mengetahui & Menangani Rencana Kinerja Pengguna:
+
+1. **Auto-Fetch Otomatis dari Akun KIPApp Pengguna:**
+   Jalankan skrip generator dengan flag `--fetch-rk`:
+   ```bash
+   uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"
+   ```
+   Skrip akan membuka KIPApp, membaca dropdown pilihan SKP yang sedang aktif di akun pengguna tersebut, dan menampilkan seluruh butir Rencana Kinerjanya secara presisi.
+
+2. **Diberikan Manual oleh Pengguna (Teks Chat / File):**
+   Pengguna dapat memberikan butir SKP di pesan chat atau lewat file:
+   ```bash
+   uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SKP 2" --periode "<PERIODE>"
+   ```
+   Atau menggunakan file JSON daftar butir SKP:
+   ```bash
+   uv run python generate_kegiatan_from_rk.py --rk-file daftar_rk.json --periode "<PERIODE>"
+   ```
+
+3. **Penyusunan Berbasis Kemampuan LLM / AI Agen (Paling Direkomendasikan):**
+   Agen dapat langsung memanfaatkan pemahaman bahasa alami untuk merancang rincian kegiatan kerja harian ASN yang spesifik, realistis, dan berbobot sesuai dengan tupoksi butir SKP pengguna. Kegiatan disebar ke hari kerja efektif (Senin – Jumat), lalu disimpan ke format JSON sebelum diinput.
+
+---
+
+## 🚀 Kemampuan & Alur Penggunaan
+
+### 1. Auto-Generate Kegiatan Dinamis
+Jika pengguna meminta *"buatkan kegiatan dari SKP saya"*:
+- Tarik butir SKP via `--fetch-rk` atau gunakan butir SKP yang disediakan pengguna.
+- Generate kegiatan dengan tahapan realistis (Persiapan & Koordinasi, Pelaksanaan Teknis, Verifikasi & Validasi, Pelaporan/Evaluasi).
+- Simpan ke file JSON (contoh `kegiatan_auto_generated.json`).
 
 ### 2. Input Kegiatan dari File (Excel, CSV, JSON) atau Teks Chat
 - **Excel (`.xlsx` / `.xls`) & CSV**: Kolom otomatis dideteksi (`Tanggal`, `Tanggal Selesai`, `Kegiatan`, `Rencana Kinerja`, `Capaian`, `Progres`, `Bukti Dukung`).
 - **Mendukung Rentang Tanggal**:
   - Format string: `"2026-06-15 - 2026-06-19"` atau `"2026-06-15 s.d 2026-06-19"`.
   - Format 2 kolom terpisah: `Tanggal` dan `Tanggal Selesai`.
-  - Skrip otomatis mencentang opsi *"Gunakan periode tanggal"* di formulir KIPApp dan mengisikan tanggal awal serta tanggal akhir.
+  - Skrip otomatis mencentang opsi *"Gunakan periode tanggal"* di formulir KIPApp dan mengisi rentang kalender.
 - **JSON**: Mengikuti struktur `daftar_kegiatan_template.json`.
-- **Teks Chat**: Jika pengguna menulis daftar kegiatan di pesan, agen menyimpan ke file JSON lalu menjalankan skrip.
 
 ### 3. Pengisian Otomatis Bukti Dukung Google Drive
-- Mendukung flag `--drive-url "<URL_FOLDER_DRIVE>"` untuk mengisi link bukti dukung pada form secara serentak jika kolom bukti dukung kosong.
+- Mendukung flag `--drive-url "<URL_FOLDER_DRIVE>"` untuk mengisi link bukti dukung pada form secara serentak jika kolom bukti dukung per kegiatan kosong.
 
 ### 4. Mode Eksekusi
 - **Dry-Run (Preview Tanpa Save)**:
@@ -53,12 +79,7 @@ Jika pengguna meminta untuk *"mengisi/mengotomatiskan kegiatan dari daftar renca
 
 ---
 
-## 📋 Daftar Butir Rencana Kinerja (Referensi Mapping)
-- `pengolahan` : Terlaksanakannya kegiatan pengolahan yang berkualitas dan tepat waktu
-- `perangkat dan jaringan` : Terlaksanakannya kegiatan pengelolaan perangkat dan jaringan yang berkualitas dan tepat waktu
-- `pembinaan` : Terlaksanakannya kegiatan Pembinaan Statistik Sektoral yang berkualitas dan tepat waktu
-- `sbr` : Terlaksanakannya kegiatan pengelolaan Statistic Business Register (SBR) yang berkualitas dan tepat waktu
-- `kompetensi` : Terlaksananya Tata Kelola Pengembangan Kompetensi yang Tertib
-- `monitoring` : Tersedianya Laporan Monitoring Kegiatan Statistik Kependudukan dan Ketenagakerjaan
-- `sistem informasi` : Terlaksanakannya kegiatan pengembangan sistem informasi yang berkualitas dan tepat waktu
-- `publikasi` : Tersedianya publikasi yang berkualitas dan tepat waktu
+## 🔍 Mekanisme Pencocokan Dropdown Rencana Kinerja
+Di form input KIPApp, skrip mencocokkan kata kunci (`rencana_kinerja_keyword`) dengan opsi pada dropdown:
+- Cukup berikan kata pembeda yang unik (2–4 kata dari kalimat SKP pengguna, misalnya `"pengolahan"`, `"pengelolaan perangkat"`, `"pembinaan statistik"`, `"administrasi keuangan"`, dsb.).
+- Skrip akan mencari elemen dropdown yang memuat teks tersebut secara otomatis.

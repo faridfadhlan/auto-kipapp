@@ -5,15 +5,19 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 ---
 
 ## 📌 Fitur Utama
-1. **Sesi Login Persisten (`browser_data`)**: Login SSO BPS hanya perlu dilakukan sekali. Sesi tersimpan aman di direktori lokal tanpa perlu login berulang kali.
-2. **Skill Antigravity (`kipapp`)**: Terpasang secara global (`~/.gemini/config/skills/kipapp/SKILL.md`) sehingga Anda bisa langsung meminta agen mengisikan kegiatan di sesi obrolan mana pun.
-3. **Mendukung Berbagai Format File**:
+
+1. **Rencana Kinerja (SKP) Dinamis**: Menyesuaikan butir SKP masing-masing pegawai tanpa batasan fix/kaku (baik bidang Sosial, Distribusi, Produksi, Nerwilis, IPDS, Umum/TU, Fungsional Statistisi/Pranata Komputer, dsb.).
+2. **Auto-Fetch Butir SKP**: Mampu membaca langsung seluruh butir Rencana Kinerja aktif dari akun KIPApp pengguna (`--fetch-rk`).
+3. **Penyusunan Kegiatan Cerdas (AI / Generator)**: Otomatis menyusun tahapan kegiatan realistis (Persiapan, Pelaksanaan, Verifikasi, Pelaporan) ke hari kerja efektif (Senin–Jumat).
+4. **Sesi Login Persisten (`browser_data/`)**: Login SSO BPS hanya perlu dilakukan sekali. Sesi tersimpan aman di direktori lokal Anda tanpa perlu login berulang kali.
+5. **Mendukung Tanggal Tunggal & Rentang Tanggal**: Mendukung format `"YYYY-MM-DD"` maupun periode rentang `"YYYY-MM-DD - YYYY-MM-DD"`.
+6. **Mendukung Berbagai Format File**:
    - File Excel (`.xlsx`, `.xls`)
    - File CSV (`.csv`)
    - File JSON (`.json`)
    - Teks langsung di pesan chat
-4. **Integrasi Google Drive**: Otomatis mengisi link bukti dukung (bisa satu link folder utama atau link spesifik per kegiatan).
-5. **Mode Dry-Run (Preview)**: Memungkinkan Anda melihat tampilan pengisian form sebelum disimpan ke server KIPApp (dilengkapi screenshot review).
+7. **Integrasi Google Drive**: Otomatis mengisi link bukti dukung (folder utama atau per kegiatan).
+8. **Mode Dry-Run (Preview)**: Memungkinkan Anda melihat tampilan pengisian form sebelum disimpan ke server KIPApp (dilengkapi screenshot review).
 
 ---
 
@@ -22,43 +26,61 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 | File | Deskripsi |
 | :--- | :--- |
 | `auto_input_kegiatan.py` | Skrip utama untuk menjalankan otomasi input form kegiatan. |
-| `generate_kegiatan_from_rk.py` | Skrip generator kegiatan otomatis dari daftar Rencana Kinerja (SKP). |
+| `generate_kegiatan_from_rk.py` | Generator kegiatan otomatis dari butir SKP pengguna (bisa fetch otomatis atau manual). |
 | `daftar_kegiatan_template.json` | Template data kegiatan berformat JSON. |
 | `launch_login.py` | Skrip untuk membuka browser dan login manual pertama kali jika sesi kedaluwarsa. |
-| `browser_data/` | Direktori penyimpanan profil browser & cookies (jangan dihapus/commit). |
+| `browser_data/` | Direktori penyimpanan profil browser & cookies (aman dan diabaikan oleh git). |
 | `.agents/skills/kipapp/SKILL.md` | Definisi skill Antigravity untuk agen. |
 
 ---
 
 ## 🚀 Cara Penggunaan
 
-### 1. Menyiapkan Data Kegiatan
-Anda bisa menyediakan file Excel (`.xlsx`), CSV (`.csv`), atau JSON (`.json`).
+### 1. Auto-Generate Kegiatan dari Butir SKP Anda
+
+**Opsi A — Tarik butir SKP otomatis dari akun KIPApp Anda:**
+```bash
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II"
+```
+
+**Opsi B — Masukkan butir SKP kustom Anda sendiri:**
+```bash
+uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SKP 2" --periode "Triwulan II"
+```
+*(Hasilnya akan disimpan di `kegiatan_auto_generated.json` yang siap diinputkan ke KIPApp).*
+
+---
+
+### 2. Input Kegiatan dari File (Excel / CSV / JSON)
 
 **Format Kolom Excel / CSV:**
-- `Tanggal` (contoh: `2026-06-02`)
+- `Tanggal` (contoh: `2026-06-02` atau rentang `2026-06-02 - 2026-06-05`)
+- `Tanggal Selesai` (opsional jika tanggal akhir di kolom terpisah)
 - `Kegiatan` (contoh: `Melakukan evaluasi hasil validasi data SE2026`)
-- `Rencana Kinerja` (kata kunci butir SKP, misal: `pengolahan`, `sistem informasi`, `pembinaan`, `SBR`)
+- `Rencana Kinerja` (kata kunci pembeda butir SKP Anda, misal: `pengolahan`, `keuangan`, `publikasi`)
 - `Capaian` (opsional, jika kosong disamakan dengan kegiatan)
 - `Progres` (angka persentase, default: 100)
 - `Bukti Dukung` (opsional, link Google Drive)
 
-### 2. Melalui Obrolan Antigravity (Paling Mudah)
-Cukup ketik perintah seperti:
-> *"Tolong inputkan kegiatan Triwulan II dari file kegiatan_juni.xlsx, dengan folder bukti dukung https://drive.google.com/..."*
+---
 
-Agen akan otomatis mengaktifkan skill **`kipapp`** dan memprosesnya untuk Anda!
+### 3. Eksekusi Pengisian Form KIPApp
 
-### 2. Uji Coba Pengisian (Dry-Run Preview)
-Jalankan perintah ini untuk melihat form diisi secara visual tanpa benar-benar menyimpan ke server:
+**Mode Dry-Run (Preview Tanpa Menyimpan):**
 ```bash
-uv run python auto_input_kegiatan.py --dry-run
+uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --dry-run
 ```
-*(Screenshot hasil pengisian tiap baris akan tersimpan sebagai `preview_kegiatan_1.png`, `preview_kegiatan_2.png`, dst.)*
+*(Screenshot review form akan tersimpan sebagai `preview_kegiatan_1.png`, dst.)*
 
-### 3. Eksekusi Pengisian Nyata (Live Save)
-Setelah data kegiatan dipastikan benar, jalankan tanpa flag `--dry-run`:
+**Mode Live (Simpan Langsung ke KIPApp):**
 ```bash
-uv run python auto_input_kegiatan.py --file daftar_kegiatan_template.json --periode "Triwulan II"
+uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --drive-url "https://drive.google.com/..."
 ```
-Skrip akan otomatis membuka form, mengisi seluruh data, dan mengklik tombol **Save** untuk tiap kegiatan.
+
+---
+
+### 4. Melalui Obrolan Antigravity (Paling Praktis)
+Jika Anda menggunakan asisten AI Antigravity, cukup katakan:
+> *"Tolong buatkan kegiatan untuk Triwulan II dari butir SKP saya dan langsung inputkan ke KIPApp dengan link bukti dukung https://drive.google.com/..."*
+
+Agen akan secara otomatis mengaktifkan skill **`kipapp`**, mengambil butir SKP Anda, merancang kegiatan harian yang sesuai, dan memprosesnya.
