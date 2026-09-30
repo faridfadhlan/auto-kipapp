@@ -60,7 +60,27 @@ def load_activities(file_path: Path):
     else:
         raise ValueError(f"Format file '{ext}' tidak didukung. Gunakan .json, .csv, atau .xlsx")
 
-def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", default_drive_url: str = "", dry_run: bool = False):
+import re
+
+def normalize_periode(periode_str: str) -> str:
+    """
+    Menormalkan format triwulan input (misal: 'TW 1', 'triwulan 3')
+    menjadi format standar KIPApp ('Triwulan I', 'Triwulan III', dst.)
+    """
+    p = str(periode_str).strip().lower()
+    if re.search(r'\b(tw|triwulan)?\s*(iv|4)\b', p):
+        return "Triwulan IV"
+    elif re.search(r'\b(tw|triwulan)?\s*(iii|3)\b', p):
+        return "Triwulan III"
+    elif re.search(r'\b(tw|triwulan)?\s*(ii|2)\b', p):
+        return "Triwulan II"
+    elif re.search(r'\b(tw|triwulan)?\s*(i|1)\b', p):
+        return "Triwulan I"
+    elif "tahunan" in p:
+        return "Tahunan"
+    return periode_str
+
+def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", dry_run: bool = False):
     activities_file = Path(file_path)
     if not activities_file.exists():
         print(f"[ERROR] File kegiatan {file_path} tidak ditemukan!")
@@ -76,9 +96,13 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", default
         print("[WARNING] Tidak ada data kegiatan untuk diinput.")
         return
 
+    norm_periode = normalize_periode(periode_keyword)
+
     print("=" * 65)
     print(f"Memulai Otomasi Input Kegiatan KIPApp BPS ({len(activities)} kegiatan)")
-    print(f"Periode SKP Target: {periode_keyword}")
+    print(f"Periode SKP Target: {norm_periode} (Input: {periode_keyword})")
+    if tahun:
+        print(f"Tahun Anggaran/SKP: {tahun}")
     if default_drive_url:
         print(f"Default Google Drive Link: {default_drive_url}")
     print(f"Mode: {'DRY RUN (Preview Tanpa Save)' if dry_run else 'LIVE (Simpan ke KIPApp)'}")
@@ -101,17 +125,32 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", default
         page.evaluate("() => document.querySelectorAll('.ant-modal-wrap, .ant-modal-mask').forEach(e => e.remove())")
         time.sleep(1)
 
+        # Pilih Tahun jika ditentukan
+        if tahun:
+            print(f"Memilih Tahun: {tahun}...")
+            tahun_dropdown = page.locator(".ant-select").nth(1)
+            tahun_dropdown.click(force=True)
+            time.sleep(0.8)
+            opt_tahun = page.locator(f".ant-select-dropdown li:has-text('{tahun}')").first
+            if opt_tahun.is_visible():
+                opt_tahun.click(force=True)
+                time.sleep(1.5)
+
         # [2/4] Pilih Periode SKP
-        print(f"[2/4] Memilih Periode SKP ({periode_keyword})...")
+        print(f"[2/4] Memilih Periode SKP ({norm_periode})...")
         skp_dropdown = page.locator(".ant-select:has-text('Pilih SKP')").first
         if not skp_dropdown.is_visible():
             skp_dropdown = page.locator(".ant-select").nth(2) # Dropdown ke-3 (Pegawai, Tahun, SKP)
         skp_dropdown.click(force=True)
         time.sleep(1)
 
-        target_opt = page.locator(f".ant-select-dropdown li:has-text('{periode_keyword}')").first
+        target_opt = page.locator(f".ant-select-dropdown li:has-text('{norm_periode}')").first
         if not target_opt.is_visible():
-            print(f"[ERROR] Periode SKP '{periode_keyword}' tidak ditemukan di dropdown!")
+            # Fallback coba teks aslinya
+            target_opt = page.locator(f".ant-select-dropdown li:has-text('{periode_keyword}')").first
+            
+        if not target_opt.is_visible():
+            print(f"[ERROR] Periode SKP '{norm_periode}' (atau '{periode_keyword}') tidak ditemukan di dropdown!")
             context.close()
             return
 
@@ -254,9 +293,10 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", default
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Otomasi Input Kegiatan KIPApp BPS")
     parser.add_argument("--file", "-f", default="daftar_kegiatan_template.json", help="Path ke file JSON kegiatan")
-    parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II)")
+    parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', 'TW IV')")
+    parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")
     parser.add_argument("--dry-run", action="store_true", help="Uji coba pengisian form tanpa mengklik Save")
     args = parser.parse_args()
 
-    input_kegiatan(args.file, args.periode, default_drive_url=args.drive_url, dry_run=args.dry_run)
+    input_kegiatan(args.file, args.periode, tahun=args.tahun, default_drive_url=args.drive_url, dry_run=args.dry_run)

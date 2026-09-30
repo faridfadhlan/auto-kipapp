@@ -38,16 +38,22 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 
 ### 1. Auto-Generate Kegiatan dari Butir SKP Anda
 
+Skrip dan skill mendukung penyesuaian triwulan (`Triwulan I`, `Triwulan II`, `Triwulan III`, `Triwulan IV`, maupun `Tahunan`) serta tahun anggaran secara otomatis.
+
 **Opsi A — Tarik butir SKP otomatis dari akun KIPApp Anda:**
 ```bash
-uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II"
+# Contoh untuk Triwulan I
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan I" --tahun 2026
+
+# Contoh untuk Triwulan III
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan III"
 ```
 
 **Opsi B — Masukkan butir SKP kustom Anda sendiri:**
 ```bash
-uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SKP 2" --periode "Triwulan II"
+uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SKP 2" --periode "Triwulan III"
 ```
-*(Hasilnya akan disimpan di `kegiatan_auto_generated.json` yang siap diinputkan ke KIPApp).*
+*(Hasilnya akan disimpan di `kegiatan_auto_generated.json` dengan rentang tanggal kerja efektif yang otomatis disesuaikan).*
 
 ---
 

@@ -24,6 +24,23 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 > Butir SKP bervariasi sesuai unit kerja atau tim fungsi (Statistik Sosial, Statistik Distribusi, Statistik Produksi, Nerwilis, IPDS, Bagian Umum/Tata Usaha, Fungsional Statistisi, Pranata Komputer, dll.).
 > Jangan mengasumsikan butir SKP statis atau tetap.
 
+---
+
+## 📅 Penyesuaian Triwulan & Tahun Otomatis dari Prompt
+
+Agen dan skrip **secara otomatis mengenali dan menyesuaikan triwulan serta tahun** dari permintaan pengguna:
+
+| Input Prompt Pengguna | Periode KIPApp | Rentang Tanggal Otomatis (Hari Kerja) |
+| :--- | :--- | :--- |
+| *"Triwulan 1"*, *"TW I"*, *"Januari - Maret"* | `Triwulan I` | `01 Januari` s.d `31 Maret` |
+| *"Triwulan 2"*, *"TW II"*, *"April - Juni"* | `Triwulan II` | `01 April` s.d `30 Juni` |
+| *"Triwulan 3"*, *"TW III"*, *"Juli - September"* | `Triwulan III` | `01 Juli` s.d `30 September` |
+| *"Triwulan 4"*, *"TW IV"*, *"Oktober - Desember"* | `Triwulan IV` | `01 Oktober` s.d `31 Desember` |
+| *"Tahunan"* | `Tahunan` | `01 Januari` s.d `31 Desember` |
+
+- **Deteksi Tahun**: Jika pengguna menyebutkan tahun (misal: *"Triwulan 3 tahun 2026"*), gunakan `--tahun 2026` dan tahun pada tanggal akan otomatis diset ke `2026`. Jika tidak disebutkan, default ke tahun berjalan.
+- **Normalisasi Otomatis**: Skrip menerima format angka Arab (`1`, `2`, `3`, `4`) maupun Romawi (`I`, `II`, `III`, `IV`) dan otomatis mencocokkannya ke opsi dropdown KIPApp.
+
 ### Cara Mengetahui & Menangani Rencana Kinerja Pengguna:
 
 1. **Auto-Fetch Otomatis dari Akun KIPApp Pengguna:**

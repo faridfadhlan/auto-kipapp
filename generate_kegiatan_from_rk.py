@@ -103,12 +103,42 @@ def dynamic_generate_activities_for_topic(topic: str) -> list[tuple[str, str]]:
         )
     ]
 
-def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II") -> list[str]:
+import re
+
+def get_period_dates(periode_str: str, tahun: int = None) -> tuple[str, str, str]:
+    """
+    Menormalkan nama triwulan dan menghitung rentang tanggal default (start, end)
+    Contoh: 'Triwulan 1' -> ('Triwulan I', '2026-01-01', '2026-03-31')
+    """
+    p = str(periode_str).strip().lower()
+    if tahun is None or not str(tahun).isdigit():
+        tahun = datetime.date.today().year
+        for token in p.split():
+            if token.isdigit() and len(token) == 4:
+                tahun = int(token)
+    else:
+        tahun = int(tahun)
+
+    if re.search(r'\b(tw|triwulan)?\s*(iv|4)\b', p):
+        return "Triwulan IV", f"{tahun}-10-01", f"{tahun}-12-31"
+    elif re.search(r'\b(tw|triwulan)?\s*(iii|3)\b', p):
+        return "Triwulan III", f"{tahun}-07-01", f"{tahun}-09-30"
+    elif re.search(r'\b(tw|triwulan)?\s*(ii|2)\b', p):
+        return "Triwulan II", f"{tahun}-04-01", f"{tahun}-06-30"
+    elif re.search(r'\b(tw|triwulan)?\s*(i|1)\b', p):
+        return "Triwulan I", f"{tahun}-01-01", f"{tahun}-03-31"
+    elif "tahunan" in p:
+        return "Tahunan", f"{tahun}-01-01", f"{tahun}-12-31"
+        
+    return periode_str, f"{tahun}-04-01", f"{tahun}-06-30"
+
+def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II", tahun: str = "") -> list[str]:
     """
     Membuka KIPApp secara otomatis via persistent browser session
     dan membaca seluruh opsi butir Rencana Kinerja (SKP) pengguna yang aktif.
     """
-    print(f"\n[1/2] Menghubungkan ke KIPApp untuk membaca Rencana Kinerja ({periode_keyword})...")
+    norm_periode, _, _ = get_period_dates(periode_keyword, int(tahun) if str(tahun).isdigit() else None)
+    print(f"\n[1/2] Menghubungkan ke KIPApp untuk membaca Rencana Kinerja ({norm_periode})...")
     with sync_playwright() as p:
         ctx = p.chromium.launch_persistent_context(
             str(USER_DATA_DIR),
@@ -120,16 +150,29 @@ def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II") -> list[str
         time.sleep(2)
         page.evaluate("() => document.querySelectorAll('.ant-modal-wrap, .ant-modal-mask').forEach(e => e.remove())")
         
+        # Pilih Tahun jika ada
+        if tahun:
+            tahun_dropdown = page.locator(".ant-select").nth(1)
+            tahun_dropdown.click(force=True)
+            time.sleep(0.8)
+            opt_tahun = page.locator(f".ant-select-dropdown li:has-text('{tahun}')").first
+            if opt_tahun.is_visible():
+                opt_tahun.click(force=True)
+                time.sleep(1.5)
+
         # Pilih Periode SKP
         skp_dropdown = page.locator(".ant-select").nth(2)
         skp_dropdown.click(force=True)
         time.sleep(1)
-        target = page.locator(f".ant-select-dropdown li:has-text('{periode_keyword}')").first
+        target = page.locator(f".ant-select-dropdown li:has-text('{norm_periode}')").first
+        if not target.is_visible():
+            target = page.locator(f".ant-select-dropdown li:has-text('{periode_keyword}')").first
+
         if target.is_visible():
             target.click(force=True)
             time.sleep(2)
         else:
-            print(f"[WARNING] Periode '{periode_keyword}' tidak ditemukan di dropdown.")
+            print(f"[WARNING] Periode '{norm_periode}' (atau '{periode_keyword}') tidak ditemukan di dropdown.")
             
         # Buka modal Add
         add_btn = page.locator("button:has-text('+ Add'), button:has-text('Add')").first
@@ -239,20 +282,28 @@ def generate_activities_for_rk_list(
 def main():
     parser = argparse.ArgumentParser(description="Generator Kegiatan KIPApp Dinamis dari Rencana Kinerja Pengguna")
     parser.add_argument("--fetch-rk", action="store_true", help="Ambil daftar RK otomatis langsung dari akun KIPApp yang login")
-    parser.add_argument("--periode", "-p", default="Triwulan II", help="Periode SKP target (default: Triwulan II)")
+    parser.add_argument("--periode", "-p", default="Triwulan II", help="Periode SKP target (contoh: 'Triwulan I', 'Triwulan 3', 'TW IV', 'Tahunan')")
+    parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--rk", help="Daftar butir RK manual (pisahkan dengan titik koma ';')")
     parser.add_argument("--rk-file", help="Path ke file JSON/TXT daftar RK pengguna")
-    parser.add_argument("--start-date", default="2026-04-01", help="Tanggal awal periode (YYYY-MM-DD)")
-    parser.add_argument("--end-date", default="2026-06-30", help="Tanggal akhir periode (YYYY-MM-DD)")
+    parser.add_argument("--start-date", default=None, help="Tanggal awal periode (YYYY-MM-DD, otomatis jika dikosongkan)")
+    parser.add_argument("--end-date", default=None, help="Tanggal akhir periode (YYYY-MM-DD, otomatis jika dikosongkan)")
     parser.add_argument("--drive-url", "-d", default="", help="Default URL Google Drive bukti dukung")
     parser.add_argument("--count", "-c", type=int, default=2, help="Jumlah kegiatan per butir RK (default: 2)")
     parser.add_argument("--templates", help="Path ke file JSON custom templates (opsional)")
 
     args = parser.parse_args()
 
+    # Hitung normalisasi periode dan tanggal default
+    norm_periode, def_start, def_end = get_period_dates(args.periode, args.tahun)
+    start_date = args.start_date if args.start_date else def_start
+    end_date = args.end_date if args.end_date else def_end
+
+    print(f"Periode Terpilih: {norm_periode} ({start_date} s.d {end_date})")
+
     rk_list = []
     if args.fetch_rk:
-        rk_list = fetch_user_rencana_kinerja(args.periode)
+        rk_list = fetch_user_rencana_kinerja(norm_periode, tahun=args.tahun)
     elif args.rk:
         rk_list = [item.strip() for item in args.rk.split(";") if item.strip()]
     elif args.rk_file and Path(args.rk_file).exists():
@@ -266,7 +317,7 @@ def main():
         # Default: Coba fetch otomatis dari KIPApp pengguna aktif
         print("Tidak ada input RK yang diberikan. Mencoba mengambil otomatis dari akun KIPApp...")
         try:
-            rk_list = fetch_user_rencana_kinerja(args.periode)
+            rk_list = fetch_user_rencana_kinerja(norm_periode, tahun=args.tahun)
         except Exception as e:
             print(f"[ERROR] Gagal mengambil RK dari browser: {e}")
             print("Gunakan opsi --rk \"Rencana 1; Rencana 2\" atau --rk-file <path_file.json>")
@@ -275,8 +326,8 @@ def main():
     if rk_list:
         generate_activities_for_rk_list(
             rk_list=rk_list,
-            start_date=args.start_date,
-            end_date=args.end_date,
+            start_date=start_date,
+            end_date=end_date,
             drive_url=args.drive_url,
             activities_per_rk=args.count,
             custom_templates_file=args.templates or ""
