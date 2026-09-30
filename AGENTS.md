@@ -1,6 +1,6 @@
 # AGENTS.md — Panduan Instruksi untuk Semua Agent AI Coding
 
-Dokumen ini merupakan panduan standar untuk setiap Agent AI Coding (**Google Antigravity, Claude Code, Cursor, GitHub Copilot, Windsurf, Cline/Roo Code, OpenHands/Devin**, dll.) dalam mengoperasikan otomasi pengisian kegiatan harian di **KIPApp BPS** (`https://kipapp.bps.go.id`).
+Dokumen ini merupakan panduan standar untuk setiap Agent AI Coding (**Google Antigravity, Claude Code, Cursor, GitHub Copilot, Windsurf, Cline, Roo Code, Kilo Code, OpenCode, OpenHands, Zed / Z-Code, Devin**, dll.) dalam mengoperasikan otomasi pengisian kegiatan harian di **KIPApp BPS** (`https://kipapp.bps.go.id`).
 
 ---
 
@@ -118,7 +118,7 @@ uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triw
 
 ## 💬 Pola Permintaan Pengguna & Respon Agent (Semua Agent Coding)
 
-Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Antigravity, OpenHands, dll.) harus merespon prompt pengguna dengan alur kerja berikut:
+Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Roo Code, Kilo Code, OpenCode, OpenHands, Zed, Antigravity, dll.) harus merespon prompt pengguna dengan alur kerja berikut:
 
 ### Skenario 1: Permintaan Auto-Generate dari SKP
 - **Prompt Contoh**: *"Buatkan kegiatan SKP Triwulan II 2026 dari akun KIPApp saya"*

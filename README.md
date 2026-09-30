@@ -51,9 +51,12 @@ Skill dan otomasi ini langsung dikenali secara otomatis tanpa konfigurasi manual
 - **Claude Code**: Membaca `CLAUDE.md`.
 - **Cursor IDE**: Membaca `.cursorrules` dan `.cursor/rules/kipapp.mdc`.
 - **GitHub Copilot**: Membaca `.github/copilot-instructions.md`.
-- **Windsurf IDE**: Membaca `.windsurfrules`.
+- **Windsurf IDE (Cascade)**: Membaca `.windsurfrules`.
 - **Cline & Roo Code**: Membaca `.clinerules`.
-- **OpenHands / Devin / Standard LLM**: Membaca `AGENTS.md`.
+- **Kilo Code**: Membaca `.kilorules` dan `.clinerules`.
+- **OpenCode & OpenHands**: Membaca `AGENTS.md`.
+- **Zed (Z-Code / Zed AI)**: Membaca `AGENTS.md`.
+- **Devin, Aider, Goose, & Open LLM Agents**: Membaca `AGENTS.md`.
 
 ---
 
