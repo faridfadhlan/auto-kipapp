@@ -1,0 +1,20 @@
+[
+  {
+    "tanggal": "2026-06-02",
+    "rencana_kinerja_keyword": "pengolahan",
+    "kegiatan": "Melakukan evaluasi hasil validasi data SE2026",
+    "progres": 100,
+    "capaian": "Terselesaikannya evaluasi hasil validasi data SE2026",
+    "link_dukung": "",
+    "masuk_capaian_skp": false
+  },
+  {
+    "tanggal": "2026-06-03",
+    "rencana_kinerja_keyword": "sistem informasi",
+    "kegiatan": "Pemeliharaan dan backup basis data aplikasi internal",
+    "progres": 100,
+    "capaian": "Terlaksananya pemeliharaan dan backup basis data dengan aman",
+    "link_dukung": "",
+    "masuk_capaian_skp": false
+  }
+]
