@@ -154,12 +154,30 @@ def get_period_dates(periode_str: str, tahun: int = None) -> tuple[str, str, str
 
 def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II", tahun: str = "", browser_data: str = "") -> list[str]:
     """
-    Membuka KIPApp secara otomatis via persistent browser session
-    dan membaca seluruh opsi butir Rencana Kinerja (SKP) pengguna yang aktif.
+    Membaca seluruh opsi butir Rencana Kinerja (SKP) pengguna yang aktif.
+    Mengutamakan REST API langsung untuk kecepatan milidetik, dengan fallback ke Playwright browser.
     """
     norm_periode, _, _ = get_period_dates(periode_keyword, int(tahun) if str(tahun).isdigit() else None)
+    
+    # 1. Coba via REST API KIPApp terlebih dahulu (Super Cepat ~0.2 detik)
+    try:
+        from kipapp_api import KipappAPI
+        api = KipappAPI(browser_data=browser_data)
+        th = int(tahun) if str(tahun).isdigit() else 2026
+        skp = api.get_skp_by_periode(norm_periode, tahun=th)
+        if skp:
+            skpid = str(skp.get("id"))
+            rks = api.get_rencana_kinerja(skpid)
+            rk_texts = [r.get("rencanakinerja", "").strip() for r in rks if r.get("rencanakinerja")]
+            if rk_texts:
+                print(f"\n[1/2] Berhasil membaca {len(rk_texts)} butir Rencana Kinerja aktif via REST API ({norm_periode}).")
+                return rk_texts
+    except Exception as api_err:
+        print(f"[API] Fallback ke browser otomasi: {api_err}")
+
+    # 2. Fallback via Playwright Browser Otomasi
     user_data_dir = get_browser_data_dir(browser_data)
-    print(f"\n[1/2] Menghubungkan ke KIPApp untuk membaca Rencana Kinerja ({norm_periode})...")
+    print(f"\n[1/2] Menghubungkan ke KIPApp via browser untuk membaca Rencana Kinerja ({norm_periode})...")
     print(f"      Profil Browser: {user_data_dir}")
     with sync_playwright() as p:
         ctx = p.chromium.launch_persistent_context(

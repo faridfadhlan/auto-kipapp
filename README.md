@@ -6,19 +6,25 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 
 ## 📌 Fitur Utama
 
-1. **Rencana Kinerja (SKP) Dinamis**: Menyesuaikan butir SKP masing-masing pegawai tanpa batasan fix/kaku (baik bidang Sosial, Distribusi, Produksi, Nerwilis, IPDS, Umum/TU, Fungsional Statistisi/Pranata Komputer, dsb.).
-2. **Auto-Fetch Butir SKP**: Mampu membaca langsung seluruh butir Rencana Kinerja aktif dari akun KIPApp pengguna (`--fetch-rk`).
-3. **Penyusunan Kegiatan Cerdas (AI / Generator)**: Otomatis menyusun tahapan kegiatan realistis (Persiapan, Pelaksanaan, Verifikasi, Pelaporan) ke hari kerja efektif (Senin–Jumat).
-4. **Sesi Login Persisten**: Login SSO BPS hanya perlu dilakukan sekali. Sesi tersimpan aman di direktori lokal `./browser_data` atau direktori pengguna `~/.kipapp/browser_data` dan otomatis dapat digunakan di folder project mana pun tanpa perlu login berulang kali.
-5. **Mendukung Tanggal Tunggal & Rentang Tanggal**: Mendukung format `"YYYY-MM-DD"` maupun periode rentang `"YYYY-MM-DD - YYYY-MM-DD"`.
-6. **Mendukung Berbagai Format File**:
+1. **Arsitektur Hybrid (REST API Internal + Playwright Browser)**:
+   - **Super Cepat (Milidetik)**: Berkomunikasi langsung dengan REST API internal KIPApp (`https://kipapp.bps.go.id/api/v1/`). Fetch SKP selesai dalam ~0.2 detik, input 10 kegiatan selesai dalam ~1–2 detik (vs 2–3 menit browser).
+   - **Deterministik & Ringan**: Tidak membebani CPU dengan rendering DOM browser yang berat.
+   - **Sesi Otomatis & Caching**: Token JWT Bearer otomatis disinkronkan dari sesi SSO browser dan dicache di `~/.kipapp/session_token.json`.
+   - **Graceful Fallback & Visual Mode**: Otomatis membuka Playwright browser jika sesi habis atau jika pengguna menambahkan flag `--browser` untuk preview visual.
+2. **Rencana Kinerja (SKP) Dinamis**: Menyesuaikan butir SKP masing-masing pegawai tanpa batasan fix/kaku (baik bidang Sosial, Distribusi, Produksi, Nerwilis, IPDS, Umum/TU, Fungsional Statistisi/Pranata Komputer, dsb.).
+3. **Auto-Fetch Butir SKP**: Mampu membaca langsung seluruh butir Rencana Kinerja aktif dari akun KIPApp pengguna (`--fetch-rk`).
+4. **Penyusunan Kegiatan Cerdas (AI / Generator)**: Otomatis menyusun tahapan kegiatan realistis (Persiapan, Pelaksanaan, Verifikasi, Pelaporan) ke hari kerja efektif (Senin–Jumat).
+5. **Centang Capaian SKP Otomatis**: Opsi *"Masukan ke capaian SKP"* selalu dicentang secara default pada setiap kegiatan yang disimpan atau diperbarui.
+6. **Sesi Login Persisten**: Login SSO BPS hanya perlu dilakukan sekali. Sesi tersimpan aman di direktori lokal `./browser_data` atau direktori pengguna `~/.kipapp/browser_data` dan otomatis dapat digunakan di folder project mana pun tanpa perlu login berulang kali.
+7. **Mendukung Tanggal Tunggal & Rentang Tanggal**: Mendukung format `"YYYY-MM-DD"` maupun periode rentang `"YYYY-MM-DD - YYYY-MM-DD"`.
+8. **Mendukung Berbagai Format File**:
    - File Excel (`.xlsx`, `.xls`)
    - File CSV (`.csv`)
    - File JSON (`.json`)
    - Teks langsung di pesan chat
-7. **Integrasi Google Drive**: Otomatis mengisi link bukti dukung (folder utama atau per kegiatan).
-8. **Mode Dry-Run (Preview)**: Memungkinkan Anda melihat tampilan pengisian form sebelum disimpan ke server KIPApp (dilengkapi screenshot review).
-9. **Edit / Pembaruan Isian Realisasi SKP**: Mampu memperbarui data kegiatan yang telah tersimpan di KIPApp secara massal maupun terfilter (mengisi/mengganti tautan bukti dukung Google Drive, mengubah persentase progres, deskripsi capaian, dan centang capaian SKP).
+9. **Integrasi Google Drive**: Otomatis mengisi link bukti dukung (folder utama atau per kegiatan) dan auto-upload file fisik lokal.
+10. **Mode Dry-Run (Preview)**: Memungkinkan Anda melihat simulasi pengisian form atau preview tangkapan layar form (`--dry-run` atau `--dry-run --browser`).
+11. **Edit / Pembaruan Isian Realisasi SKP**: Mampu memperbarui data kegiatan yang telah tersimpan di KIPApp secara massal dalam hitungan detik via REST API (`edit_kegiatan.py` atau `kipapp_api.py`).
 
 ---
 
@@ -26,9 +32,10 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 
 | File | Deskripsi |
 | :--- | :--- |
-| `auto_input_kegiatan.py` | Skrip utama untuk menjalankan otomasi input form kegiatan. |
-| `edit_kegiatan.py` | Skrip otomasi untuk mengedit/memperbarui butir kegiatan (misal update tautan bukti dukung, progres, capaian). |
-| `generate_kegiatan_from_rk.py` | Generator kegiatan otomatis dari butir SKP pengguna (bisa fetch otomatis atau manual). |
+| `kipapp_api.py` | Modul client REST API internal KIPApp BPS untuk operasi milidetik (fetch SKP, query RK, input kegiatan, bulk update, checklist). |
+| `auto_input_kegiatan.py` | Skrip utama input kegiatan (otomatis menggunakan REST API super cepat, fallback ke Playwright browser atau flag `--browser`). |
+| `edit_kegiatan.py` | Skrip otomasi untuk mengedit/memperbarui butir kegiatan (update tautan bukti dukung, progres, capaian, dan checklist SKP secara massal). |
+| `generate_kegiatan_from_rk.py` | Generator kegiatan otomatis dari butir SKP pengguna (bisa fetch otomatis via API/browser atau input manual). |
 | `gdrive_uploader.py` | Modul pengunggah otomatis file bukti dukung lokal ke Google Drive. |
 | `daftar_kegiatan_template.json` | Template data kegiatan berformat JSON. |
 | `launch_login.py` | Skrip untuk membuka browser dan login manual pertama kali jika sesi kedaluwarsa. |
@@ -91,7 +98,34 @@ Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup 
 > *"Tolong tambahkan/update semua bukti dukung kegiatan di Triwulan II ke URL folder Google Drive: https://drive.google.com/drive/folders/<ID_FOLDER_GOOGLE_DRIVE>"*
 > *(Atau: "Lengkapi bukti dukung yang masih kosong saja di Triwulan II dengan link Drive https://drive.google.com/drive/folders/...")*
 
+#### 🔹 9. Centang Massal Capaian SKP
+> *"Tolong cek dan centang semua kegiatan saya di Triwulan III agar masuk ke capaian SKP."*
+
 ---
+
+## ⚡ Eksekusi CLI Cepat (REST API & Mode Visual)
+
+Semua skrip otomatis berjalan dalam **mode REST API super cepat** secara default:
+
+```bash
+# 1. Fetch SKP & Auto-Generate Kegiatan (~0.2 detik)
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan III"
+
+# 2. Input Kegiatan Cepat via REST API (~1 detik)
+uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan III"
+
+# 3. Input Kegiatan Mode Browser Visual (Playwright)
+uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan III" --browser
+
+# 4. Edit Bukti Dukung / Progres Massal via REST API
+uv run python edit_kegiatan.py --periode "Triwulan III" --drive-url "https://drive.google.com/..." --all
+
+# 5. Utilitas REST API Langsung (Inspeksi & Checklist)
+uv run python kipapp_api.py --list-skp
+uv run python kipapp_api.py --list-rk --periode "Triwulan III"
+uv run python kipapp_api.py --list-kegiatan --periode "Triwulan III"
+uv run python kipapp_api.py --update-checklists --periode "Triwulan III"
+```
 
 ## ☁️ Integrasi Google Drive (Auto-Upload Bukti Dukung)
 

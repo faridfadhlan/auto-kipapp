@@ -215,7 +215,143 @@ def normalize_periode(periode_str: str) -> str:
         return "Tahunan"
     return periode_str
 
-def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", gdrive_folder_id: str = "", browser_data: str = "", dry_run: bool = False):
+def input_kegiatan_api(
+    activities: list,
+    periode_keyword: str = "Triwulan II",
+    tahun: str = "",
+    default_drive_url: str = "",
+    gdrive_folder_id: str = "",
+    browser_data: str = "",
+    dry_run: bool = False
+) -> bool:
+    """
+    Menginput kegiatan secara instan via REST API KIPApp (kecepatan milidetik).
+    Mengembalikan True jika sukses, False jika butuh fallback ke browser.
+    """
+    try:
+        from kipapp_api import KipappAPI
+        api = KipappAPI(browser_data=browser_data)
+
+        th = int(tahun) if str(tahun).isdigit() else 2026
+        norm_periode = normalize_periode(periode_keyword)
+        skp = api.get_skp_by_periode(norm_periode, tahun=th)
+        if not skp:
+            print(f"[API] SKP untuk {norm_periode} tahun {th} tidak ditemukan via API.")
+            return False
+
+        skpid = str(skp.get("id"))
+        statusskp = skp.get("statusskp", "")
+        print("\n" + "=" * 65)
+        print(f"[REST API] Menghubungkan ke KIPApp BPS ({norm_periode} - Tahun {th})")
+        print(f"SKP ID: {skpid} | Status SKP: {statusskp}")
+        print("=" * 65)
+
+        if statusskp and statusskp.lower() not in ["sedang dibuat", "draft"]:
+            print(f"[WARNING] Status SKP saat ini: '{statusskp}'.")
+            print("         Server KIPApp umumnya hanya mengizinkan input pada status 'Sedang dibuat'.")
+
+        # Ambil daftar RK aktif pada SKP ini
+        rks = api.get_rencana_kinerja(skpid)
+        if not rks:
+            print("[API] Tidak ditemukan butir Rencana Kinerja aktif pada SKP target.")
+            return False
+
+        if dry_run:
+            print(f"\n[DRY RUN via API] Memvalidasi {len(activities)} kegiatan tanpa menyimpan...")
+            for i, item in enumerate(activities, 1):
+                rk_kw = item.get("rencana_kinerja_keyword", "")
+                rk_obj = api.match_rk(skpid, rk_kw) if rk_kw else rks[0]
+                rk_name = rk_obj.get("rencanakinerja", "") if rk_obj else "(Tidak ditemukan)"
+                tgl = item.get("tanggal", "-")
+                keg = item.get("kegiatan", "")
+                print(f"  {i}. [{tgl}] RK: {rk_name[:40]}... -> {keg[:50]}...")
+            print(f"\nDry run API selesai. Semua {len(activities)} kegiatan valid.")
+            print("(Gunakan flag '--dry-run --browser' jika ingin melihat simulasi visual tangkapan layar form).")
+            return True
+
+        # Live Save via REST API
+        success_count = 0
+        total = len(activities)
+        print(f"\nMemulai pengiriman {total} kegiatan via REST API (milidetik per item)...")
+
+        for i, item in enumerate(activities, 1):
+            kegiatan_text = item.get("kegiatan", "")
+            if not kegiatan_text:
+                continue
+
+            rk_kw = item.get("rencana_kinerja_keyword", "")
+            rk_obj = api.match_rk(skpid, rk_kw) if rk_kw else rks[0]
+            if not rk_obj:
+                print(f"  [{i}/{total}] ❌ Gagal: Tidak ada butir RK yang cocok untuk '{rk_kw}'")
+                continue
+
+            rkid = str(rk_obj.get("rkid") or rk_obj.get("id"))
+
+            # Format Tanggal
+            tanggal_str = str(item.get("tanggal", "")).strip()
+            tanggal_selesai = str(item.get("tanggal_selesai", "")).strip() or None
+            if not tanggal_selesai:
+                if " - " in tanggal_str:
+                    parts = tanggal_str.split(" - ")
+                    tanggal_str = parts[0].strip()
+                    tanggal_selesai = parts[1].strip()
+                elif " s.d " in tanggal_str:
+                    parts = tanggal_str.split(" s.d ")
+                    tanggal_str = parts[0].strip()
+                    tanggal_selesai = parts[1].strip()
+
+            # Data Dukung
+            raw_dukung = item.get("link_dukung", "").strip() or default_drive_url.strip()
+            link_dukung = ""
+            if raw_dukung:
+                if raw_dukung.startswith("http://") or raw_dukung.startswith("https://"):
+                    link_dukung = raw_dukung
+                else:
+                    try:
+                        from gdrive_uploader import upload_file_to_drive
+                        link_dukung = upload_file_to_drive(raw_dukung, folder_id=gdrive_folder_id)
+                    except Exception as upload_err:
+                        print(f"  [WARNING] Gagal upload file ke Drive: {upload_err}")
+                        link_dukung = raw_dukung
+
+            # Checkbox Masukan ke Capaian SKP (Wajib Selalu 1/Checked secara default)
+            masuk_skp = item.get("masuk_capaian_skp", True)
+            iscapaianskp = 0 if (masuk_skp is False or str(masuk_skp).lower() in ["false", "0", "tidak"]) else 1
+
+            capaian_text = item.get("capaian", kegiatan_text)
+            progres_val = int(item.get("progres", 100))
+
+            res = api.create_kegiatan(
+                skpid=skpid,
+                rkid=rkid,
+                kegiatan=kegiatan_text,
+                tanggal=tanggal_str,
+                tanggalselesai=tanggal_selesai,
+                capaian=capaian_text,
+                progres=progres_val,
+                datadukung=link_dukung,
+                iscapaianskp=iscapaianskp
+            )
+
+            if isinstance(res, dict) and res.get("status"):
+                success_count += 1
+                tgl_disp = f"{tanggal_str} s.d {tanggal_selesai}" if tanggal_selesai else tanggal_str
+                print(f"  [{i}/{total}] ✅ [{tgl_disp}] {kegiatan_text[:55]}...")
+            else:
+                msg = res.get("message", str(res)) if isinstance(res, dict) else str(res)
+                print(f"  [{i}/{total}] ❌ Gagal: {msg}")
+
+        print("\n" + "=" * 65)
+        print(f"Selesai! {success_count} dari {total} kegiatan berhasil disimpan via REST API.")
+        print("=" * 65)
+        return True
+
+    except Exception as e:
+        print(f"[API] Gagal eksekusi via REST API: {e}")
+        return False
+
+
+def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", gdrive_folder_id: str = "", browser_data: str = "", dry_run: bool = False, use_browser: bool = False):
     activities_file = Path(file_path)
     if not activities_file.exists():
         print(f"[ERROR] File kegiatan {file_path} tidak ditemukan!")
@@ -232,10 +368,27 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
         return
 
     norm_periode = normalize_periode(periode_keyword)
+
+    # 1. Jika pengguna tidak memaksa mode browser dan bukan dry-run preview screenshot, gunakan REST API instan
+    if not use_browser:
+        api_success = input_kegiatan_api(
+            activities=activities,
+            periode_keyword=periode_keyword,
+            tahun=tahun,
+            default_drive_url=default_drive_url,
+            gdrive_folder_id=gdrive_folder_id,
+            browser_data=browser_data,
+            dry_run=dry_run
+        )
+        if api_success:
+            return
+        print("\n[FALLBACK] Beralih otomatis ke otomasi browser Playwright...")
+
+    # 2. Mode Playwright Browser Otomasi (Visual / Fallback)
     user_data_dir = get_browser_data_dir(browser_data)
 
     print("=" * 65)
-    print(f"Memulai Otomasi Input Kegiatan KIPApp BPS ({len(activities)} kegiatan)")
+    print(f"Memulai Otomasi Input Kegiatan via Browser KIPApp ({len(activities)} kegiatan)")
     print(f"Periode SKP Target: {norm_periode} (Input: {periode_keyword})")
     if tahun:
         print(f"Tahun Anggaran/SKP: {tahun}")
@@ -495,7 +648,17 @@ if __name__ == "__main__":
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")
     parser.add_argument("--gdrive-folder-id", default="", help="ID Folder Google Drive tujuan jika bukti dukung berupa file lokal")
     parser.add_argument("--browser-data", default="", help="Lokasi kustom direktori browser_data (opsional)")
+    parser.add_argument("--browser", action="store_true", help="Paksa gunakan otomasi Playwright browser visual (bukan REST API)")
     parser.add_argument("--dry-run", action="store_true", help="Uji coba pengisian form tanpa mengklik Save")
     args = parser.parse_args()
 
-    input_kegiatan(args.file, args.periode, tahun=args.tahun, default_drive_url=args.drive_url, gdrive_folder_id=args.gdrive_folder_id, browser_data=args.browser_data, dry_run=args.dry_run)
+    input_kegiatan(
+        args.file,
+        args.periode,
+        tahun=args.tahun,
+        default_drive_url=args.drive_url,
+        gdrive_folder_id=args.gdrive_folder_id,
+        browser_data=args.browser_data,
+        dry_run=args.dry_run,
+        use_browser=args.browser
+    )

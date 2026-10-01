@@ -44,7 +44,7 @@ def normalize_periode(periode_str: str) -> str:
         return "Tahunan"
     return periode_str
 
-def edit_kegiatan(
+def edit_kegiatan_api(
     periode_keyword: str = "Triwulan II",
     tahun: str = "",
     drive_url: str = "",
@@ -57,12 +57,187 @@ def edit_kegiatan(
     new_masuk_skp: str = "",
     browser_data: str = "",
     dry_run: bool = False
+) -> bool:
+    """
+    Memperbarui kegiatan secara massal via REST API internal KIPApp (kecepatan milidetik).
+    Mengembalikan True jika sukses, False jika butuh fallback ke browser.
+    """
+    try:
+        from kipapp_api import KipappAPI
+        api = KipappAPI(browser_data=browser_data)
+
+        th = int(tahun) if str(tahun).isdigit() else 2026
+        norm_periode = normalize_periode(periode_keyword)
+        skp = api.get_skp_by_periode(norm_periode, tahun=th)
+        if not skp:
+            print(f"[API] SKP untuk {norm_periode} tahun {th} tidak ditemukan via API.")
+            return False
+
+        skpid = str(skp.get("id"))
+        statusskp = skp.get("statusskp", "")
+        print("\n" + "=" * 65)
+        print(f"[REST API] Menghubungkan ke KIPApp BPS ({norm_periode} - Tahun {th})")
+        print(f"SKP ID: {skpid} | Status SKP: {statusskp}")
+        print("=" * 65)
+
+        if statusskp and statusskp.lower() not in ["sedang dibuat", "draft"]:
+            print(f"[WARNING] Status SKP saat ini: '{statusskp}'.")
+            print("         Server KIPApp umumnya hanya mengizinkan pengubahan pada status 'Sedang dibuat'.")
+
+        kegs = api.get_kegiatan_list(skpid)
+        if not kegs:
+            print(f"[API] Tidak ada catatan kegiatan yang ditemukan pada {norm_periode}.")
+            return True
+
+        print(f"[API] Berhasil mengambil {len(kegs)} kegiatan. Menerapkan filter...")
+
+        # Filter kegiatan
+        targets = []
+        skipped_count = 0
+        for k in kegs:
+            has_bukti = bool(k.get("datadukung"))
+            keg_text = k.get("kegiatan", "")
+            tgl_text = k.get("tanggal", "")
+
+            if only_empty_bukti and has_bukti:
+                skipped_count += 1
+                continue
+
+            if keyword_filter:
+                kw = keyword_filter.lower()
+                if kw not in keg_text.lower():
+                    skipped_count += 1
+                    continue
+
+            if date_filter:
+                if date_filter not in tgl_text:
+                    skipped_count += 1
+                    continue
+
+            targets.append(k)
+
+        print(f"[API] {len(targets)} kegiatan memenuhi kriteria ({skipped_count} dilewati).")
+        if not targets:
+            return True
+
+        if dry_run:
+            print(f"\n[DRY RUN via API] Simulasi perubahan pada {len(targets)} kegiatan:")
+            for i, item in enumerate(targets, 1):
+                kid = item.get("kegiatanperhariid") or item.get("id")
+                tgl = item.get("tanggal", "-")
+                keg = item.get("kegiatan", "")
+                print(f"  {i}. [ID {kid}] [{tgl}] {keg[:60]}...")
+                if drive_url:
+                    print(f"     -> Set Bukti: {drive_url}")
+                if new_progres:
+                    print(f"     -> Set Progres: {new_progres}%")
+                if new_capaian:
+                    print(f"     -> Set Capaian: {new_capaian[:40]}...")
+                if new_masuk_skp:
+                    print(f"     -> Set Masuk SKP: {new_masuk_skp}")
+            print("\nDry run API selesai. Tidak ada data yang diubah di server KIPApp.")
+            return True
+
+        # Eksekusi Update via REST API
+        updated_count = 0
+        print(f"\nMemulai update {len(targets)} kegiatan via REST API...")
+        for i, item in enumerate(targets, 1):
+            kid = item.get("kegiatanperhariid") or item.get("id")
+            rkid = str(item.get("rkid"))
+            keg = item.get("kegiatan")
+            tgl = item.get("tanggal")
+            tgl_selesai = item.get("tanggalselesai")
+
+            # Bukti dukung
+            target_bukti = drive_url if drive_url else (item.get("datadukung") or "")
+
+            # Progres
+            target_progres = int(new_progres) if new_progres else item.get("progres", 100)
+
+            # Capaian
+            target_capaian = new_capaian if new_capaian else (item.get("capaian") or item.get("kegiatan"))
+
+            # Masuk capaian SKP (Wajib Selalu 1/Checked secara default)
+            if new_masuk_skp:
+                if new_masuk_skp.lower() in ["false", "0", "tidak"]:
+                    target_skp = 0
+                else:
+                    target_skp = 1
+            else:
+                target_skp = 1
+
+            res = api.update_kegiatan(
+                kegiatan_id=str(kid),
+                skpid=skpid,
+                rkid=rkid,
+                kegiatan=keg,
+                tanggal=tgl,
+                tanggalselesai=tgl_selesai,
+                capaian=target_capaian,
+                progres=target_progres,
+                datadukung=target_bukti,
+                iscapaianskp=target_skp
+            )
+
+            if isinstance(res, dict) and res.get("status"):
+                updated_count += 1
+                print(f"  [{i}/{len(targets)}] ✅ ID {kid} [{tgl}]: {keg[:50]}...")
+            else:
+                msg = res.get("message", str(res)) if isinstance(res, dict) else str(res)
+                print(f"  [{i}/{len(targets)}] ❌ Gagal ID {kid}: {msg}")
+
+        print("\n" + "=" * 65)
+        print(f"Selesai! {updated_count} dari {len(targets)} kegiatan berhasil diperbarui via REST API.")
+        print("=" * 65)
+        return True
+
+    except Exception as e:
+        print(f"[API] Gagal eksekusi edit via REST API: {e}")
+        return False
+
+
+def edit_kegiatan(
+    periode_keyword: str = "Triwulan II",
+    tahun: str = "",
+    drive_url: str = "",
+    update_all: bool = False,
+    only_empty_bukti: bool = False,
+    keyword_filter: str = "",
+    date_filter: str = "",
+    new_progres: str = "",
+    new_capaian: str = "",
+    new_masuk_skp: str = "",
+    browser_data: str = "",
+    dry_run: bool = False,
+    use_browser: bool = False
 ):
     norm_periode = normalize_periode(periode_keyword)
+
+    # 1. Jika pengguna tidak memaksa browser, jalankan via REST API instan
+    if not use_browser:
+        api_success = edit_kegiatan_api(
+            periode_keyword=periode_keyword,
+            tahun=tahun,
+            drive_url=drive_url,
+            update_all=update_all,
+            only_empty_bukti=only_empty_bukti,
+            keyword_filter=keyword_filter,
+            date_filter=date_filter,
+            new_progres=new_progres,
+            new_capaian=new_capaian,
+            new_masuk_skp=new_masuk_skp,
+            browser_data=browser_data,
+            dry_run=dry_run
+        )
+        if api_success:
+            return
+        print("\n[FALLBACK] Beralih otomatis ke otomasi browser Playwright...")
+
+    # 2. Mode Playwright Browser Otomasi (Visual / Fallback)
     user_data_dir = get_browser_data_dir(browser_data)
 
     print("=" * 65)
-    print("Memulai Otomasi Edit / Pembaruan Realisasi Kegiatan KIPApp BPS")
+    print("Memulai Otomasi Edit / Pembaruan Realisasi Kegiatan via Browser KIPApp")
     print(f"Periode SKP Target: {norm_periode} (Input: {periode_keyword})")
     if tahun:
         print(f"Tahun: {tahun}")
@@ -359,6 +534,7 @@ if __name__ == "__main__":
     parser.add_argument("--capaian", default="", help="Deskripsi capaian baru")
     parser.add_argument("--masuk-skp", default="", help="Set centang Masukan ke Capaian SKP (true/false)")
     parser.add_argument("--browser-data", default="", help="Direktori profil browser kustom")
+    parser.add_argument("--browser", action="store_true", help="Paksa gunakan otomasi Playwright browser visual (bukan REST API)")
     parser.add_argument("--dry-run", action="store_true", help="Simulasi tanpa menyimpan perubahan")
 
     args = parser.parse_args()
@@ -375,5 +551,6 @@ if __name__ == "__main__":
         new_capaian=args.capaian,
         new_masuk_skp=args.masuk_skp,
         browser_data=args.browser_data,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
+        use_browser=args.browser
     )

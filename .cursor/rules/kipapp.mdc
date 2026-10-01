@@ -12,17 +12,24 @@ Membantu pengguna mengelola dan mengotomasi pengisian formulir catatan kegiatan 
 ## Pedoman Operasional
 - **Privasi Kredensial**: Dilarang menyertakan token, cookies SSO, NIP pegawai, atau folder `browser_data/` dalam commit Git.
 - **Direktori Proyek Dinamis**: Gunakan root workspace aktif saat ini untuk membaca file input (`.xlsx`, `.csv`, `.json`, `.txt`, catatan harian) dan menyimpan file output.
-- **Rencana Kinerja (SKP) Dinamis**: Butir SKP pegawai berbeda-beda. Gunakan `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` untuk menarik daftar SKP aktif pengguna. Kegiatan terkait entri data/dokumen, tabulasi, export, atau backup WAJIB dipetakan ke butir terkait **pengolahan**.
+- **Rencana Kinerja (SKP) Dinamis**: Butir SKP pegawai berbeda-beda. Gunakan `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` untuk menarik daftar SKP aktif pengguna secara instan via REST API (~0.2 detik). Kegiatan terkait entri data/dokumen, tabulasi, export, atau backup WAJIB dipetakan ke butir terkait **pengolahan**.
+- **Centang Capaian SKP**: Opsi *"Masukan ke capaian SKP"* WAJIB SELALU DICENTANG (checked) secara default.
 - **Penyesuaian Triwulan & Tanggal**: Deteksi otomatis periode Triwulan (I, II, III, IV) dan tahun dari prompt. Hanya gunakan hari kerja efektif (Senin–Jumat).
 
 ## Perintah Eksekusi
 ```bash
-# Tarik SKP dan buat kegiatan otomatis
+# Tarik SKP dan buat kegiatan otomatis (REST API super cepat)
 uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II"
+
+# Input kegiatan langsung via REST API (Default ~1 detik)
+uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --drive-url "https://drive.google.com/..."
+
+# Input kegiatan mode browser visual (Playwright)
+uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --browser
 
 # Preview pengisian form (Dry Run)
 uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --dry-run
 
-# Input form langsung (Live Save)
-uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --drive-url "https://drive.google.com/..."
+# Edit / Update bukti dukung & capaian massal
+uv run python edit_kegiatan.py --periode "Triwulan II" --drive-url "<URL_DRIVE>" --all
 ```

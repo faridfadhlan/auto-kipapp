@@ -112,18 +112,24 @@ Jika pengguna meminta *"buatkan kegiatan dari SKP saya"*:
   - Atau konfigurasikan path-nya di file `.env` (contoh tersedia di `.env.example`).
 - **Default Link Drive Global**: Mendukung flag `--drive-url "<URL_FOLDER_DRIVE>"` sebagai fallback jika kolom bukti dukung kosong.
 
-### 4. Mode Eksekusi
-- **Dry-Run (Preview Tanpa Save)**:
-  ```bash
-  uv run python auto_input_kegiatan.py --file <PATH_FILE> --periode "<PERIODE>" --drive-url "<URL_DRIVE>" --dry-run
-  ```
-- **Live Save (Simpan ke KIPApp)**:
+### 4. Mode Eksekusi (Arsitektur Hybrid)
+- **Eksekusi Cepat via REST API (Default - Rekomendasi Utama)**:
+  Berjalan dalam hitungan milidetik per item secara langsung ke API internal KIPApp:
   ```bash
   uv run python auto_input_kegiatan.py --file <PATH_FILE> --periode "<PERIODE>" --drive-url "<URL_DRIVE>"
   ```
+- **Mode Browser Visual (Playwright)**:
+  Gunakan flag `--browser` jika ingin melihat otomasi interaksi browser:
+  ```bash
+  uv run python auto_input_kegiatan.py --file <PATH_FILE> --periode "<PERIODE>" --browser
+  ```
+- **Dry-Run (Preview Tanpa Save)**:
+  ```bash
+  uv run python auto_input_kegiatan.py --file <PATH_FILE> --periode "<PERIODE>" --dry-run
+  ```
 
 ### 5. Edit / Pembaruan Massal Realisasi Kegiatan (`edit_kegiatan.py`)
-Mendukung pembaruan tautan bukti dukung, progres, capaian, dan centang SKP untuk kegiatan yang sudah ada di KIPApp:
+Mendukung pembaruan tautan bukti dukung, progres, capaian, dan centang SKP untuk kegiatan yang sudah ada di KIPApp secara instan via REST API:
 - **Update Semua Bukti Dukung di Triwulan Tertentu**:
   ```bash
   uv run python edit_kegiatan.py --periode "<PERIODE>" --drive-url "<URL_GOOGLE_DRIVE>" --all
@@ -137,9 +143,16 @@ Mendukung pembaruan tautan bukti dukung, progres, capaian, dan centang SKP untuk
   uv run python edit_kegiatan.py --periode "<PERIODE>" --drive-url "<URL_GOOGLE_DRIVE>" -k "publikasi"
   ```
 
+### 6. Utilitas REST API Langsung (`kipapp_api.py`)
+- Cek daftar SKP aktif & status: `uv run python kipapp_api.py --list-skp`
+- Cek butir RK aktif: `uv run python kipapp_api.py --list-rk --periode "<PERIODE>"`
+- Cek daftar kegiatan tersimpan: `uv run python kipapp_api.py --list-kegiatan --periode "<PERIODE>"`
+- Centang massal capaian SKP: `uv run python kipapp_api.py --update-checklists --periode "<PERIODE>"`
+
 ---
 
 ## 🔍 Mekanisme Pencocokan Dropdown Rencana Kinerja
 Di form input KIPApp, skrip mencocokkan kata kunci (`rencana_kinerja_keyword`) dengan opsi pada dropdown:
 - Cukup berikan kata pembeda yang unik (2–4 kata dari kalimat SKP pengguna, misalnya `"pengolahan"`, `"pengelolaan perangkat"`, `"pembinaan statistik"`, `"administrasi keuangan"`, dsb.).
 - Skrip akan mencari elemen dropdown yang memuat teks tersebut secara otomatis.
+

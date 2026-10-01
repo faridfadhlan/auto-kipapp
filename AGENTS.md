@@ -68,6 +68,11 @@ Agent otomatis mendeteksi periode triwulan dan tahun dari permintaan pengguna:
 
 ## 🛠️ Perintah Eksekusi Utama
 
+Sistem menggunakan **Arsitektur Hybrid**:
+- **Default (REST API)**: Eksekusi milidetik, hemat resource, deterministik. Fetch SKP (~0.2 detik), input 10 kegiatan (~1 detik).
+- **Mode Browser (`--browser`)**: Jalur Playwright browser visual jika pengguna ingin melihat pengisian form langsung.
+- **Auto-Fallback**: Jika sesi API membutuhkan refresh, sistem otomatis mengambil token atau fallback ke Playwright browser.
+
 Agent dapat menggunakan runner `uv run python` atau `python3`:
 
 ### 1. Inisialisasi Sesi Login (Jika Belum Login / Sesi Habis)
@@ -78,7 +83,7 @@ uv run python launch_login.py
 
 ### 2. Auto-Generate Kegiatan Dinamis dari SKP
 ```bash
-# Otomatis fetch dari KIPApp sesuai periode triwulan
+# Otomatis fetch dari KIPApp via REST API (cepat ~0.2 detik)
 uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II" --tahun 2026
 
 # Atau dengan butir SKP spesifik dari pengguna
@@ -87,11 +92,35 @@ uv run python generate_kegiatan_from_rk.py --rk "Nama Butir SKP 1; Nama Butir SK
 
 ### 3. Input Kegiatan ke Form KIPApp (Excel / CSV / JSON)
 ```bash
-# Mode Preview / Dry-Run (Tanpa Klik Save)
-uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --dry-run
-
-# Mode Eksekusi Nyata (Live Save)
+# Mode Eksekusi Nyata via REST API Super Cepat (Default)
 uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --drive-url "https://drive.google.com/..."
+
+# Mode Browser Visual (Playwright)
+uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --browser
+
+# Mode Preview / Dry-Run (Tanpa Simpan)
+uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triwulan II" --dry-run
+```
+
+### 4. Edit / Pembaruan Massal Butir Realisasi
+```bash
+# Update bukti dukung / capaian via REST API
+uv run python edit_kegiatan.py --periode "Triwulan II" --drive-url "<URL_DRIVE>" --all
+```
+
+### 5. Utilitas REST API Langsung
+```bash
+# List SKP aktif dan statusnya
+uv run python kipapp_api.py --list-skp
+
+# List butir Rencana Kinerja aktif
+uv run python kipapp_api.py --list-rk --periode "Triwulan II"
+
+# List seluruh kegiatan pada periode tertentu
+uv run python kipapp_api.py --list-kegiatan --periode "Triwulan II"
+
+# Centang massal capaian SKP untuk seluruh kegiatan
+uv run python kipapp_api.py --update-checklists --periode "Triwulan II"
 ```
 
 ---
