@@ -24,8 +24,14 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
     ```bash
     uv run python ~/.gemini/config/skills/kipapp/scripts/auto_input_kegiatan.py ...
     ```
-- **Sesi Login Browser**:
-  - Terpusat dan otomatis dideteksi di `./browser_data` (jika ada di project) atau `~/.kipapp/browser_data` (direktori global pengguna). Login SSO BPS hanya perlu dilakukan sekali dan langsung berlaku untuk project pengguna mana pun.
+- **Sesi Login Browser & REST API**:
+  - Terpusat dan otomatis dideteksi di `./browser_data` (jika ada di project) atau `~/.kipapp/browser_data` (direktori global pengguna). Token REST API otomatis tersimpan di `~/.kipapp/session_token.json`. Login SSO BPS hanya perlu dilakukan sekali via `uv run python launch_login.py`.
+- **Langkah Onboarding (Clone s.d Chat)**:
+  1. `git clone https://github.com/faridfadhlan/auto-kipapp.git && cd auto-kipapp`
+  2. Buka folder di IDE (Antigravity, Cursor, VS Code, Windsurf, Zed, Claude Code).
+  3. Pasang Chromium: `uv run playwright install chromium` (atau `pip install -r requirements.txt`).
+  4. Login sekali: `uv run python launch_login.py`
+  5. Buka chat AI dan minta input/generate kegiatan!
 
 ---
 

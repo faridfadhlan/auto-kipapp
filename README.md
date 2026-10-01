@@ -65,11 +65,110 @@ Skill dan otomasi ini langsung dikenali secara otomatis tanpa konfigurasi manual
 - **Zed (Z-Code / Zed AI)**: Membaca `AGENTS.md`.
 - **Devin, Aider, Goose, & Open LLM Agents**: Membaca `AGENTS.md`.
 
----
-
 ## 🚀 Cara Penggunaan
 
-Anda tidak perlu menghafal atau mengetik perintah terminal secara manual. Cukup berikan instruksi menggunakan bahasa sehari-hari langsung di jendela obrolan agent AI coding Anda (**Google Antigravity, Claude Code, Cursor, GitHub Copilot, Windsurf, Cline / Roo Code, OpenHands/Devin**, dll.). Agent akan secara mandiri mengenali konteks, menyusun data kegiatan, dan mengeksekusi otomasi KIPApp.
+Panduan langkah demi langkah dari awal (cloning repositori) hingga berinteraksi dengan AI Coding Agent:
+
+---
+
+### 📥 Langkah 1: Clone Repositori & Buka Proyek
+
+Buka aplikasi terminal Anda dan jalankan perintah:
+
+```bash
+# 1. Clone repositori ini ke komputer Anda
+git clone https://github.com/faridfadhlan/auto-kipapp.git
+
+# 2. Masuk ke direktori proyek
+cd auto-kipapp
+```
+
+Buka folder proyek `auto-kipapp` di IDE / Code Editor pilihan Anda:
+- **Google Antigravity**: Buka folder `auto-kipapp` sebagai workspace aktif.
+- **Cursor IDE**: Ketik `cursor .` di terminal atau pilih menu *File > Open Folder...* lalu pilih folder `auto-kipapp`.
+- **VS Code** *(dengan GitHub Copilot / Cline / Roo Code)*: Ketik `code .` di terminal.
+- **Windsurf IDE**: Ketik `windsurf .` atau buka folder `auto-kipapp`.
+- **Claude Code**: Masuk ke terminal di folder `auto-kipapp`, lalu jalankan perintah `claude`.
+- **Zed / Z-Code**: Ketik `zed .` atau buka folder `auto-kipapp`.
+
+---
+
+### 📦 Langkah 2: Persiapan Environment & Dependensi
+
+Proyek ini membutuhkan Python (>= 3.10) dan mendukung pengelola paket modern [`uv`](https://github.com/astral-sh/uv) (sangat direkomendasikan karena cepat & tanpa perlu konfigurasi virtualenv manual) maupun `pip` standar.
+
+#### Opsi A: Menggunakan `uv` (Direkomendasikan)
+Jika Anda belum menginstal `uv`, pasang dengan satu perintah:
+- **macOS / Linux**:
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+- **Windows (PowerShell)**:
+  ```powershell
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  ```
+
+Kemudian instal browser Chromium untuk Playwright:
+```bash
+uv run playwright install chromium
+```
+*(Dengan `uv`, seluruh pustaka Python otomatis diunduh dan dipasang secara terisolasi saat skrip pertama kali dijalankan).*
+
+#### Opsi B: Menggunakan `pip` & Virtual Environment Standar
+```bash
+python3 -m venv .venv
+source .venv/bin/activate       # macOS / Linux
+# Di Windows: .venv\Scripts\activate
+
+pip install -r requirements.txt
+playwright install chromium
+```
+
+---
+
+### 🔑 Langkah 3: Inisialisasi Sesi Login SSO BPS (Hanya Dilakukan Sekali)
+
+Sebelum meminta Agent AI menginputkan kegiatan, hubungkan akun KIPApp Anda sekali saja:
+
+```bash
+uv run python launch_login.py
+# Atau jika menggunakan pip/venv: python launch_login.py
+```
+
+1. Jendela browser Chromium akan otomatis terbuka menampilkan portal login SSO BPS KIPApp (`https://kipapp.bps.go.id`).
+2. Masukkan **Username (NIP / Akun SSO)** dan **Password SSO BPS** Anda.
+3. Setelah berhasil masuk ke halaman dashboard KIPApp, tutup browser atau biarkan skrip menutupnya secara otomatis.
+4. **Selesai!** Profil dan sesi login tersimpan aman di `browser_data/` (dan terpusat di `~/.kipapp/browser_data/`). Token JWT API internal otomatis diekstrak dan dicache. Anda **tidak perlu login lagi** untuk eksekusi-eksekusi berikutnya.
+
+---
+
+### ⚙️ Langkah 4 (Opsional): Konfigurasi Bukti Dukung Google Drive
+
+Jika Anda ingin bukti dukung fisik lokal (misal file `laporan.pdf`, `foto.jpg`, `notulen.docx`) otomatis diunggah ke Google Drive dan dijadikan tautan publik:
+1. Salin template `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Isi `GDRIVE_FOLDER_ID` di file `.env` dengan ID folder Google Drive tujuan Anda.
+3. Letakkan file kredensial Google (`service_account.json` atau `credentials.json`) di folder proyek atau di `~/.kipapp/`.
+
+> [!NOTE]
+> Jika bukti dukung Anda sudah berupa tautan online/Google Drive yang sudah ada, langkah ini bisa dilewati.
+
+---
+
+### 💬 Langkah 5: Memulai Obrolan dengan AI Coding Agent
+
+Sekarang proyek Anda telah siap sepenuhnya! Buka panel obrolan (chat) AI di editor Anda:
+- **Google Antigravity**: Klik panel chat di samping atau tekan shortcut chat.
+- **Cursor IDE**: Tekan `Cmd + L` (Mac) atau `Ctrl + L` (Windows/Linux) untuk membuka Cursor Composer / Chat.
+- **Windsurf IDE**: Buka panel *Cascade*.
+- **Claude Code**: Langsung ketik instruksi di sesi terminal `claude`.
+- **GitHub Copilot / Cline / Roo Code**: Buka tab chat di sidebar VS Code.
+
+Agent AI secara otomatis membaca seluruh pedoman dan modul otomasi (`AGENTS.md`, `SKILL.md`, `.cursorrules`, dll.). Cukup berikan instruksi dalam **bahasa Indonesia sehari-hari** tanpa perlu menghafal sintaks perintah terminal!
+
+---
 
 ### 💬 Contoh Perintah Chat ke Agent AI:
 

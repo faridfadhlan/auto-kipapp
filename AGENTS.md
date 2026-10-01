@@ -68,6 +68,27 @@ Agent otomatis mendeteksi periode triwulan dan tahun dari permintaan pengguna:
 
 ## 🛠️ Perintah Eksekusi Utama
 
+### 0. Alur Onboarding Pengguna Baru (Sebelum Memulai Chat)
+1. **Clone & Buka Folder**:
+   ```bash
+   git clone https://github.com/faridfadhlan/auto-kipapp.git
+   cd auto-kipapp
+   ```
+   Buka folder ini di IDE / Editor (Antigravity, Cursor, VS Code, Windsurf, Zed, atau terminal Claude Code).
+2. **Persiapan Dependensi & Browser Playwright**:
+   ```bash
+   uv run playwright install chromium
+   # atau via pip: pip install -r requirements.txt && playwright install chromium
+   ```
+3. **Login SSO KIPApp Pertama Kali (Sekali Saja)**:
+   ```bash
+   uv run python launch_login.py
+   ```
+   Masuk dengan NIP & password SSO BPS. Sesi tersimpan aman di `browser_data/` dan token JWT tersimpan di cache.
+4. **Mulai Obrolan AI**: Buka panel chat AI di IDE dan berikan prompt kegiatan Anda!
+
+---
+
 Sistem menggunakan **Arsitektur Hybrid**:
 - **Default (REST API)**: Eksekusi milidetik, hemat resource, deterministik. Fetch SKP (~0.2 detik), input 10 kegiatan (~1 detik).
 - **Mode Browser (`--browser`)**: Jalur Playwright browser visual jika pengguna ingin melihat pengisian form langsung.
