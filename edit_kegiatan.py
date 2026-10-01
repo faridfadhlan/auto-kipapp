@@ -222,19 +222,31 @@ def edit_kegiatan(
                 print(f"   Kegiatan: {keg_str[:65]}...")
                 print(f"   Status Bukti Saat Ini: {'Sudah ada' if has_bukti else 'Belum ada bukti dukung'}")
 
+                # Pastikan modal dan dropdown sebelumnya telah tertutup
+                try:
+                    page.wait_for_selector(".ant-modal-mask, .ant-modal-wrap", state="hidden", timeout=3000)
+                except Exception:
+                    pass
+                time.sleep(0.3)
+                page.evaluate("() => document.querySelectorAll('.ant-dropdown').forEach(e => e.remove())")
+                time.sleep(0.3)
+
                 # Buka dropdown Aksi
                 aksi_btn = row.locator("button:has-text('Aksi')").first
                 aksi_btn.scroll_into_view_if_needed()
+                time.sleep(0.3)
                 aksi_btn.click(force=True)
-                time.sleep(0.8)
+                time.sleep(1)
 
                 # Klik Edit
-                edit_item = page.locator(".ant-dropdown:not(.ant-dropdown-hidden) li:has-text('Edit')").first
+                edit_item = page.locator(".ant-dropdown li:has-text('Edit')").last
                 if not edit_item.is_visible():
                     print("   [WARNING] Menu Edit tidak muncul, mencoba klik ulang tombol Aksi...")
+                    page.evaluate("() => document.querySelectorAll('.ant-dropdown').forEach(e => e.remove())")
+                    time.sleep(0.3)
                     aksi_btn.click(force=True)
-                    time.sleep(0.8)
-                    edit_item = page.locator(".ant-dropdown:not(.ant-dropdown-hidden) li:has-text('Edit')").first
+                    time.sleep(1)
+                    edit_item = page.locator(".ant-dropdown li:has-text('Edit')").last
 
                 if not edit_item.is_visible():
                     print("   [ERROR] Tidak dapat membuka menu Edit. Melanjutkan ke baris berikutnya.")
@@ -269,13 +281,23 @@ def edit_kegiatan(
 
                 # 4. Update Masuk Capaian SKP jika ditentukan
                 if new_masuk_skp:
-                    chk = modal.locator("label:has-text('Masukan ke capaian SKP') input[type='checkbox']")
-                    if new_masuk_skp.lower() in ["true", "1", "ya"]:
-                        if not chk.is_checked():
-                            chk.check()
-                    elif new_masuk_skp.lower() in ["false", "0", "tidak"]:
-                        if chk.is_checked():
-                            chk.uncheck()
+                    try:
+                        chk = modal.locator("input[id*='isCapaianSKP'], input[id*='CapaianSKP'], .ant-checkbox-wrapper:has-text('capaian SKP') input, .ant-checkbox-wrapper:has-text('Masukan ke capaian SKP') input").first
+                        wrapper = modal.locator(".ant-checkbox-wrapper:has-text('capaian SKP'), .ant-checkbox-wrapper:has-text('Masukan ke capaian SKP')").first
+                        if new_masuk_skp.lower() in ["true", "1", "ya"]:
+                            if chk.count() > 0 and not chk.is_checked():
+                                chk.check(force=True)
+                            elif wrapper.is_visible() and not wrapper.locator("input").is_checked():
+                                wrapper.click(force=True)
+                            print("   Set Capaian SKP -> Checked (Ya)")
+                        elif new_masuk_skp.lower() in ["false", "0", "tidak"]:
+                            if chk.count() > 0 and chk.is_checked():
+                                chk.uncheck(force=True)
+                            elif wrapper.is_visible() and wrapper.locator("input").is_checked():
+                                wrapper.click(force=True)
+                            print("   Set Capaian SKP -> Unchecked (Tidak)")
+                    except Exception as e:
+                        print(f"   [WARNING] Gagal mengubah status capaian SKP: {e}")
 
                 time.sleep(0.5)
 
@@ -284,6 +306,10 @@ def edit_kegiatan(
                     print(f"   [DRY RUN] Preview perubahan kegiatan #{no_str}. Membatalkan (Cancel)...")
                     modal.locator("button:has-text('Cancel')").first.click()
                     time.sleep(1)
+                    try:
+                        modal.wait_for(state="hidden", timeout=5000)
+                    except Exception:
+                        pass
                 else:
                     save_btn = modal.locator("button:has-text('Save')").first
                     save_btn.click()

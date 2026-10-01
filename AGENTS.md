@@ -48,6 +48,8 @@ Aplikasi otomasi berbasis Playwright untuk mencatat, menyusun, dan menginput cap
   Semua kegiatan yang berkaitan dengan **entri data/dokumen**, **tabulasi**, **ekspor/impor data**, atau **backup data**, **HARUS** dipetakan ke butir Rencana Kinerja (SKP) yang berkaitan dengan **pengolahan** (misal: *"Terlaksanakannya kegiatan pengolahan yang berkualitas dan tepat waktu"*, keyword: `pengolahan`), **BUKAN** ke butir survei lapangan, distribusi, atau tim lainnya.
 - **Publikasi**:
   Kegiatan pemeriksaan tabel, naskah rilis, atau penyusunan buku publikasi dipetakan ke butir yang memuat kata kunci **publikasi**.
+- **Centang Capaian SKP (Wajib Selalu Checked)**:
+  Formulir input kegiatan di portal KIPApp memuat opsi checkbox *"Masukan ke capaian SKP"*. Opsi ini **HARUS SELALU DICENTANG (CHECKED)** secara default pada setiap kegiatan yang disimpan atau digenerate, kecuali jika pengguna secara spesifik meminta sebaliknya.
 
 ---
 
@@ -102,7 +104,7 @@ uv run python auto_input_kegiatan.py --file daftar_kegiatan.xlsx --periode "Triw
 - `progres`: Angka persentase (default: 100).
 - `capaian`: Output hasil kegiatan (opsional, disamakan dengan kegiatan jika kosong).
 - `link_dukung`: Tautan bukti dukung bebas (URL web/drive) ATAU path file lokal (misal: `laporan.pdf`, `foto.jpg`). Jika berupa file lokal, sistem otomatis menguploadnya ke Google Drive dan menyisipkan link publiknya.
-- `masuk_capaian_skp`: Boolean (`true`/`false`).
+- `masuk_capaian_skp`: Boolean (`true`/`false`, **default: `true`**). Harus selalu bernilai `true` agar kegiatan otomatis terhitung ke dalam capaian realisasi SKP.
 
 ---
 

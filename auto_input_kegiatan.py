@@ -392,10 +392,15 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
                     modal.locator(".ant-calendar-picker").first.click()
                     time.sleep(0.8)
                     cal_input = page.locator(".ant-calendar-input").first
-                    if cal_input.is_visible():
-                        cal_input.fill(tanggal_str)
-                        cal_input.press("Enter")
-                        time.sleep(0.8)
+                    try:
+                        if cal_input.is_visible():
+                            cal_input.fill(tanggal_str)
+                            cal_input.press("Enter")
+                            time.sleep(0.8)
+                    except Exception:
+                        pass
+                    modal.locator(".ant-modal-title").click(force=True)
+                    time.sleep(0.4)
 
             # 3. Input Kegiatan
             kegiatan_text = item.get("kegiatan", "")
@@ -433,12 +438,23 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
                 modal.locator("input[placeholder*='Data Dukung']").first.fill(link_dukung)
                 time.sleep(0.3)
 
-            # 7. Checkbox Masukan ke Capaian SKP
-            if item.get("masuk_capaian_skp", False):
-                chk = modal.locator("label:has-text('Masukan ke capaian SKP') input[type='checkbox']")
-                if not chk.is_checked():
-                    chk.check()
-                    time.sleep(0.3)
+            # 7. Checkbox Masukan ke Capaian SKP (SELALU DICENTANG secara default)
+            masuk_skp = item.get("masuk_capaian_skp", True)
+            if masuk_skp is not False and str(masuk_skp).lower() not in ["false", "0", "tidak"]:
+                try:
+                    chk = modal.locator("#form-add_isCapaianSKP, input[id*='isCapaianSKP'], input[id*='CapaianSKP']").first
+                    if chk.count() > 0:
+                        if not chk.is_checked():
+                            chk.check(force=True)
+                            time.sleep(0.3)
+                    else:
+                        wrapper = modal.locator(".ant-checkbox-wrapper:has-text('Masukan ke capaian SKP'), .ant-checkbox-wrapper:has-text('capaian SKP')").first
+                        if wrapper.is_visible():
+                            wrapper.click(force=True)
+                            time.sleep(0.3)
+                    print("  Centang Capaian SKP: Ya (Checked)")
+                except Exception as e:
+                    print(f"  [WARNING] Gagal mencentang capaian SKP: {e}")
 
             # Preview Screenshot
             page.screenshot(path=f"preview_kegiatan_{i}.png")
@@ -451,7 +467,12 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
             else:
                 print("  Menyimpan kegiatan (Klik Save)...")
                 modal.locator("button:has-text('Save')").first.click()
-                time.sleep(3)
+                time.sleep(2)
+                try:
+                    modal.wait_for(state="hidden", timeout=10000)
+                except Exception:
+                    pass
+                time.sleep(1.5)
                 page.screenshot(path="kegiatan_saved.png")
                 print(f"  Kegiatan #{i} berhasil disimpan! Bukti simpan: kegiatan_saved.png")
                 success_count += 1

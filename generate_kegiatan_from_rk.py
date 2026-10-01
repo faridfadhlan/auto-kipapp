@@ -288,7 +288,7 @@ def generate_activities_for_rk_list(
                 "progres": 100,
                 "capaian": cap,
                 "link_dukung": drive_url,
-                "masuk_capaian_skp": False
+                "masuk_capaian_skp": True
             })
 
     generated.sort(key=lambda x: x["tanggal"])

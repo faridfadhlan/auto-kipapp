@@ -39,6 +39,7 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 > **Aturan Khusus Pemetaan Butir SKP BPS:**
 > - Kegiatan terkait **entri dokumen**, **tabulasi**, **ekspor data**, maupun **backup data** **HARUS** dipetakan ke butir Rencana Kinerja **pengolahan** (keyword: `pengolahan`).
 > - Kegiatan pemeriksaan draf/naskah publikasi dipetakan ke butir **publikasi** (keyword: `publikasi`).
+> - Opsi checkbox *"Masukan ke capaian SKP"* pada formulir KIPApp **HARUS SELALU DICENTANG (CHECKED)** secara default untuk semua kegiatan yang disimpan.
 
 ---
 
