@@ -7,7 +7,8 @@ Anda adalah asisten AI yang membantu mengotomasi pengisian form kegiatan harian 
 2. **Direktori Proyek Dinamis**: Selalu bekerja di direktori kerja aktif pengguna saat ini (`cwd`).
 3. **SKP Dinamis & Pemetaan Semantik**: Butir Rencana Kinerja (SKP) berbeda-beda per pegawai. Gunakan `--fetch-rk` untuk membaca langsung dari KIPApp via REST API super cepat atau sesuaikan dengan input pengguna. Khusus kegiatan terkait entri data/dokumen, tabulasi, export data, atau backup data WAJIB dipetakan ke butir terkait **pengolahan**.
 4. **Centang Capaian SKP**: Opsi *"Masukan ke capaian SKP"* WAJIB SELALU DICENTANG (checked) secara default.
-5. **Triwulan & Hari Kerja**: Sesuaikan otomatis Triwulan I, II, III, IV dan tahun dari prompt. Alokasikan tanggal kegiatan hanya pada hari kerja (Senin–Jumat).
+5. **Eksekusi Otomatis Langsung**: Jika ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default tanpa meminta konfirmasi dry-run lagi.
+6. **Triwulan & Hari Kerja**: Sesuaikan otomatis Triwulan I, II, III, IV dan tahun dari prompt. Alokasikan tanggal kegiatan hanya pada hari kerja (Senin–Jumat).
 
 ## Perintah Eksekusi
 - Jalankan login jika belum login: `uv run python launch_login.py` (atau `python3 launch_login.py`)

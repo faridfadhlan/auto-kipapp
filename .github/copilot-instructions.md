@@ -14,8 +14,11 @@ Membantu pengguna menyusun dan mengotomasi pengisian formulir catatan kegiatan p
 3. **Rencana Kinerja Dinamis & Aturan Pemetaan**:
    - Setiap pegawai BPS memiliki butir Rencana Kinerja (SKP) yang unik sesuai fungsi tugas.
    - Jangan menggunakan daftar SKP statis. Gunakan opsi `--fetch-rk` untuk membaca langsung dari akun KIPApp atau sesuaikan dengan butir SKP yang disediakan pengguna.
-   - **Aturan Wajib**: Seluruh kegiatan yang berkaitan dengan entri data/dokumen, tabulasi, export data, atau backup data WAJIB dipetakan ke butir Rencana Kinerja terkait **pengolahan**.
-4. **Fleksibilitas Triwulan**:
+4. **Centang Capaian SKP**:
+   - Selalu centang opsi *"Masukan ke capaian SKP"* secara default.
+5. **Eksekusi Otomatis Langsung**:
+   - Jika ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default tanpa meminta konfirmasi dry-run lagi.
+6. **Fleksibilitas Triwulan**:
    - Kenali otomatis Triwulan I, II, III, IV, Tahunan, serta tahun anggaran dari prompt pengguna.
    - Sebarkan kegiatan ke hari kerja efektif (Senin–Jumat).
 

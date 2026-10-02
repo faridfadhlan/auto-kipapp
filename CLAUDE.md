@@ -14,6 +14,7 @@ Otomasi pengisian catatan kegiatan harian pegawai BPS ke sistem KIPApp menggunak
 - **Direktori Proyek**: Bekerja selalu di direktori kerja aktif pengguna saat ini (`cwd`). Jangan asumsikan folder harus bernama tertentu.
 - **Rencana Kinerja (SKP)**: Bersifat dinamis per pegawai (Sosial, Distribusi, Produksi, Nerwilis, IPDS, Umum/TU, Fungsional, dll.). Jangan gunakan daftar statis. Khusus kegiatan terkait entri dokumen, tabulasi, export, atau backup data, WAJIB dipetakan ke butir Rencana Kinerja terkait **pengolahan**.
 - **Triwulan & Tahun**: Tangani triwulan (`Triwulan I`, `Triwulan II`, `Triwulan III`, `Triwulan IV`, `Tahunan`) dan tahun anggaran secara otomatis sesuai prompt pengguna. Tanggal kerja disebarkan ke hari kerja Senin–Jumat.
+- **Eksekusi Otomatis Langsung**: Jika ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default. JANGAN meminta konfirmasi dry-run lagi kecuali jika pengguna secara eksplisit meminta preview / simulasi tanpa simpan.
 
 ## Perintah Utama
 Jalankan perintah menggunakan `uv run python <script>` atau `python3 <script>` (otomatis berjalan via REST API super cepat):

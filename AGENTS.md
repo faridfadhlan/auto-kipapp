@@ -50,6 +50,11 @@ Aplikasi otomasi berbasis Playwright untuk mencatat, menyusun, dan menginput cap
   Kegiatan pemeriksaan tabel, naskah rilis, atau penyusunan buku publikasi dipetakan ke butir yang memuat kata kunci **publikasi**.
 - **Centang Capaian SKP (Wajib Selalu Checked)**:
   Formulir input kegiatan di portal KIPApp memuat opsi checkbox *"Masukan ke capaian SKP"*. Opsi ini **HARUS SELALU DICENTANG (CHECKED)** secara default pada setiap kegiatan yang disimpan atau digenerate, kecuali jika pengguna secara spesifik meminta sebaliknya.
+- **Eksekusi Otomatis Langsung (Default Live Input Tanpa Konfirmasi Dry-Run)**:
+  Setiap kali pengguna memberikan instruksi untuk **"masukkan kegiatan"**, **"buatkan kegiatan"**, **"catat kegiatan"**, **"inputkan kegiatan"**, atau sejenisnya (baik dari chat, file, maupun SKP akun), Agent **WAJIB LANGSUNG MENGEKSEKUSI PENYIMPANAN NYATA (LIVE SAVE) KE KIPAPP SECARA DEFAULT**.
+  - **DILARANG** berhenti hanya di tahap draf atau menanyakan konfirmasi lagi *"apakah ingin diinputkan?"*.
+  - **DILARANG** melakukan simulasi / dry-run secara otomatis jika pengguna tidak memintanya.
+  - Mode **Dry-Run / Preview HANYA DIJALANKAN JIKA PENGGUNA SECARA EKSPLISIT MEMINTA**: *"coba dry-run dulu"*, *"simulasikan dulu tanpa simpan"*, *"preview dulu"*, atau *"jangan disimpan dulu"*.
 
 ---
 
@@ -172,12 +177,17 @@ uv run python kipapp_api.py --update-checklists --periode "Triwulan II"
 
 Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Roo Code, Kilo Code, OpenCode, OpenHands, Zed, Antigravity, dll.) harus merespon prompt pengguna dengan alur kerja berikut:
 
-### Skenario 1: Permintaan Auto-Generate dari SKP
-- **Prompt Contoh**: *"Buatkan kegiatan SKP Triwulan II 2026 dari akun KIPApp saya"*
+### Skenario 1: Permintaan Pembuatan / Input Kegiatan dari SKP
+- **Prompt Contoh**: *"Buatkan kegiatan SKP Triwulan II 2026 dari akun KIPApp saya"* atau *"Masukkan kegiatan matching data untuk Triwulan III"*
 - **Tindakan Agent**:
-  1. Jalankan `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II" --tahun 2026`.
-  2. Laporkan daftar kegiatan yang berhasil digenerate kepada pengguna.
-  3. Tanyakan atau tawarkan apakah ingin langsung diinputkan ke KIPApp.
+  1. Ambil butir SKP via `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` atau susun kegiatan sesuai topik yang diminta pengguna.
+  2. Simpan ke file JSON sementara (`kegiatan_auto_generated.json`).
+  3. **LANGSUNG EKSEKUSI INPUT NYATA (LIVE SAVE) KE KIPAPP**:
+     ```bash
+     uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "<PERIODE>"
+     ```
+  4. Laporkan rincian kegiatan yang telah berhasil disimpan ke KIPApp beserta status checklist SKP-nya.
+  5. **JANGAN meminta konfirmasi dry-run atau bertanya ulang apakah ingin diinputkan**, karena tindakan default adalah langsung menyimpan.
 
 ### Skenario 2: Permintaan Input dari File (Excel/CSV/JSON)
 - **Prompt Contoh**: *"Inputkan file kegiatan_juni.xlsx ke KIPApp Triwulan II, link bukti dukung https://drive.google.com/..."*

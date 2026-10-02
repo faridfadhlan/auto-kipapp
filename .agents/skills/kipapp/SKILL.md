@@ -46,6 +46,8 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 > - Kegiatan terkait **entri dokumen**, **tabulasi**, **ekspor data**, maupun **backup data** **HARUS** dipetakan ke butir Rencana Kinerja **pengolahan** (keyword: `pengolahan`).
 > - Kegiatan pemeriksaan draf/naskah publikasi dipetakan ke butir **publikasi** (keyword: `publikasi`).
 > - Opsi checkbox *"Masukan ke capaian SKP"* pada formulir KIPApp **HARUS SELALU DICENTANG (CHECKED)** secara default untuk semua kegiatan yang disimpan.
+> - **Eksekusi Otomatis Langsung (Default Live Input Tanpa Konfirmasi Dry-Run)**:
+>   Setiap kali pengguna memberikan perintah untuk memasukkan, membuatkan, mencatat, atau menginputkan kegiatan, agen **WAJIB LANGSUNG MENGEKSEKUSI PENYIMPANAN NYATA (LIVE INPUT / SAVE) KE KIPAPP SECARA DEFAULT**. Jangan meminta konfirmasi ulang atau konfirmasi dry-run. Mode dry-run hanya dijalankan jika pengguna secara eksplisit meminta preview / simulasi tanpa simpan.
 
 ---
 
@@ -90,11 +92,12 @@ Agen dan skrip **secara otomatis mengenali dan menyesuaikan triwulan serta tahun
 
 ## 🚀 Kemampuan & Alur Penggunaan
 
-### 1. Auto-Generate Kegiatan Dinamis
-Jika pengguna meminta *"buatkan kegiatan dari SKP saya"*:
-- Tarik butir SKP via `--fetch-rk` atau gunakan butir SKP yang disediakan pengguna.
-- Generate kegiatan dengan tahapan realistis (Persiapan & Koordinasi, Pelaksanaan Teknis, Verifikasi & Validasi, Pelaporan/Evaluasi).
-- Simpan ke file JSON (contoh `kegiatan_auto_generated.json`).
+### 1. Auto-Generate Kegiatan Dinamis & Pencatatan Langsung
+Jika pengguna meminta *"buatkan kegiatan..."*, *"masukkan kegiatan..."*, atau *"catat kegiatan..."*:
+- Tarik butir SKP via API atau tentukan butir SKP yang paling kontekstual.
+- Generate rincian kegiatan realistis dan sebar ke hari kerja efektif.
+- Simpan ke file JSON sementara dan **LANGSUNG inputkan ke KIPApp (`auto_input_kegiatan.py`) secara default**.
+- **JANGAN meminta konfirmasi dry-run lagi**, langsung laporkan kegiatan yang berhasil tersimpan ke KIPApp.
 
 ### 2. Input Kegiatan dari File (Excel, CSV, JSON, TXT/Catatan Bebas) atau Teks Chat
 - **File Teks & Catatan Harian (`.txt`, `.tsv`, `.log`, `.md`)**:

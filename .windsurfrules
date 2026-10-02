@@ -7,6 +7,7 @@ Aplikasi otomasi berbasis Playwright untuk mencatat dan menginput kegiatan haria
 - **Privasi**: Dilarang mengekspos NIP, token sesi JWT, kredensial, atau folder `browser_data/`.
 - **Lokasi Kerja**: Operasikan selalu dari direktori proyek aktif pengguna saat ini (`cwd`).
 - **SKP Dinamis**: Sesuaikan butir Rencana Kinerja secara dinamis per pegawai (gunakan `--fetch-rk` atau input pengguna).
+- **Eksekusi Langsung**: Setiap ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default tanpa konfirmasi dry-run lagi.
 - **Periode Triwulan**: Sesuaikan otomatis Triwulan I, II, III, IV dan tahun anggaran dari prompt.
 
 ## Perintah Penting

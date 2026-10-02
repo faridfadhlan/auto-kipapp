@@ -14,6 +14,7 @@ Membantu pengguna mengelola dan mengotomasi pengisian formulir catatan kegiatan 
 - **Direktori Proyek Dinamis**: Gunakan root workspace aktif saat ini untuk membaca file input (`.xlsx`, `.csv`, `.json`, `.txt`, catatan harian) dan menyimpan file output.
 - **Rencana Kinerja (SKP) Dinamis**: Butir SKP pegawai berbeda-beda. Gunakan `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` untuk menarik daftar SKP aktif pengguna secara instan via REST API (~0.2 detik). Kegiatan terkait entri data/dokumen, tabulasi, export, atau backup WAJIB dipetakan ke butir terkait **pengolahan**.
 - **Centang Capaian SKP**: Opsi *"Masukan ke capaian SKP"* WAJIB SELALU DICENTANG (checked) secara default.
+- **Eksekusi Otomatis Langsung**: Setiap ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default tanpa konfirmasi dry-run lagi.
 - **Penyesuaian Triwulan & Tanggal**: Deteksi otomatis periode Triwulan (I, II, III, IV) dan tahun dari prompt. Hanya gunakan hari kerja efektif (Senin–Jumat).
 
 ## Perintah Eksekusi
