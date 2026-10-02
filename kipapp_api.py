@@ -66,18 +66,20 @@ class KipappAPI:
         self._load_cached_token()
 
     def _load_cached_token(self):
-        """Membaca token dari cache jika belum kedaluwarsa (maks 8 jam)."""
+        """Membaca token dan identitas akun dari cache."""
         if CACHE_TOKEN_FILE.exists():
             try:
                 with open(CACHE_TOKEN_FILE, "r", encoding="utf-8") as f:
                     data = json.load(f)
+                    # Data identitas pegawai bersifat permanen per akun
+                    self.pegawai_id = data.get("pegawai_id")
+                    self.nip_lama = data.get("nip_lama")
+                    self.nama = data.get("nama")
+                    self.tahun_map = {int(k): v for k, v in data.get("tahun_map", {}).items()}
+                    
                     cached_time = data.get("timestamp", 0)
                     if time.time() - cached_time < 8 * 3600:
                         self.auth_token = data.get("token")
-                        self.pegawai_id = data.get("pegawai_id")
-                        self.nip_lama = data.get("nip_lama")
-                        self.nama = data.get("nama")
-                        self.tahun_map = {int(k): v for k, v in data.get("tahun_map", {}).items()}
             except Exception:
                 pass
 
@@ -188,6 +190,9 @@ class KipappAPI:
         """Mendapatkan pegawaiid aktif pengguna."""
         if self.pegawai_id:
             return self.pegawai_id
+
+        # Pastikan token telah tersedia
+        self.get_token()
 
         if not self.nip_lama:
             self._extract_nip_from_jwt()
