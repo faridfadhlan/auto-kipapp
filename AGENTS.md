@@ -15,16 +15,23 @@ Aplikasi otomasi berbasis Playwright untuk mencatat, menyusun, dan menginput cap
 - **Direktori Proyek Dinamis**: Agent **HARUS** bekerja di dalam direktori kerja aktif pengguna saat ini (`current working directory` / workspace root).
 - **Jangan Mengasumsikan Nama Folder Tertentu**: Pengguna dapat menjalankan otomasi ini di dalam folder proyek mana pun.
 - **File Input & Output**:
-  - File data kegiatan (`.xlsx`, `.csv`, `.json`) dibaca dari folder proyek atau subfolder periode `kegiatan/<Periode>/`.
-  - File hasil generasi disimpan terpusat di subfolder periode `kegiatan/<Periode>/kegiatan_auto_generated.json`.
+  - File data kegiatan (`.xlsx`, `.csv`, `.json`) dibaca dari folder proyek atau subfolder periode `kegiatan/<YYYY-TW-0X>/` (contoh: `kegiatan/2026-TW-03/`).
+  - File hasil generasi disimpan terpusat di subfolder periode `kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json`.
 
 ---
 
-## 🔄 Mode Operasional: Mode Penggunaan vs. Mode Development
+## 🔄 Mode Operasional: Konfigurasi via File `.env` (`MODE=usage` vs `MODE=development`)
 
-Agent AI Coding **WAJIB** membedakan dua mode operasional berikut berdasarkan maksud pengguna:
+Mode operasional sistem diatur secara terpusat melalui file konfigurasi **`.env`** dengan variabel `MODE`:
 
-### 1. 🟢 Mode Penggunaan (Usage / Operational Mode) — *DEFAULT*
+```ini
+# Pilihan: 'usage' (Default) atau 'development'
+MODE=usage
+```
+
+Agent AI Coding **WAJIB** membaca nilai `MODE` dari `.env` dan mematuhi aturan berikut:
+
+### 1. 🟢 Mode Penggunaan (`MODE=usage`) — *DEFAULT*
 - **Karakteristik**: Pengguna meminta bantuan operasional harian KIPApp, misalnya:
   - *"Buatkan kegiatan SKP Triwulan III..."*
   - *"Masukkan kegiatan ke KIPApp..."*
@@ -35,15 +42,15 @@ Agent AI Coding **WAJIB** membedakan dua mode operasional berikut berdasarkan ma
 - **ATURAN MUTLAK MODE PENGGUNAAN**:
   1. 🚫 **DILARANG KERAS MENGUBAH SOURCE CODE APAPUN**:
      Agent **TIDAK BOLEH** mengedit, memodifikasi, merefaktor, atau menulis ulang kode sumber skrip (`*.py`, `auto_input_kegiatan.py`, `generate_kegiatan_from_rk.py`, `kipapp_api.py`, `edit_kegiatan.py`, `gdrive_uploader.py`, `launch_login.py`, `src/*`, dll.).
-  2. 📁 **Pengumpulan Hasil JSON di Folder Periode (`kegiatan/<Periode>/`)**:
-     - Setiap file JSON hasil generate atau draft kegiatan baru **WAJIB disimpan di folder periode yang sesuai**: `kegiatan/<Periode>/<nama_file>.json` (contoh: `kegiatan/Triwulan III/kegiatan_auto_generated.json` atau `kegiatan/Triwulan III/kegiatan_matching.json`).
+  2. 📁 **Pengumpulan Hasil JSON di Folder Periode (`kegiatan/<YYYY-TW-0X>/`)**:
+     - Setiap file JSON hasil generate atau draft kegiatan baru **WAJIB disimpan di folder pola `YYYY-TW-0X`**: `kegiatan/<YYYY-TW-0X>/<nama_file>.json` (contoh: `kegiatan/2026-TW-03/kegiatan_auto_generated.json` atau `kegiatan/2026-TW-03/kegiatan_matching.json`).
      - **DILARANG** meletakkan atau mengumpulkan file kegiatan JSON di root folder proyek!
-     - Jalankan skrip yang sudah ada langsung dari CLI (`uv run python auto_input_kegiatan.py --periode "<PERIODE>" ...`) **tanpa mengubah source code**.
+     - Jalankan skrip yang sudah ada langsung dari CLI (`uv run python auto_input_kegiatan.py --periode "2026-TW-03" ...`) **tanpa mengubah source code**.
   3. ⚡ **Eksekusi Langsung (Default Live Save)**:
      Langsung eksekusi penyimpanan nyata ke KIPApp tanpa meminta konfirmasi dry-run, kecuali pengguna secara eksplisit meminta mode dry-run/preview.
 
-### 2. 🛠️ Mode Development (Development / Engineering Mode)
-- **Karakteristik**: Hanya aktif jika pengguna **secara eksplisit** meminta pengembangan kode atau modifikasi fitur sistem, misalnya:
+### 2. 🛠️ Mode Development (`MODE=development`)
+- **Karakteristik**: Hanya aktif jika di `.env` diset `MODE=development` ATAU pengguna **secara eksplisit** meminta pengembangan kode atau modifikasi fitur sistem, misalnya:
   - *"Tolong tambahkan fitur X ke auto_input_kegiatan.py..."*
   - *"Perbaiki bug error di kipapp_api.py..."*
   - *"Refactor skrip ini..."*
@@ -54,28 +61,28 @@ Agent AI Coding **WAJIB** membedakan dua mode operasional berikut berdasarkan ma
 
 ---
 
-## 📂 Struktur Folder Daftar Kegiatan Berdasarkan Periode
+## 📂 Struktur Folder Daftar Kegiatan: Pola `YYYY-TW-0X`
 
-File data kegiatan JSON dikelompokkan rapi ke dalam folder periode masing-masing di bawah direktori `kegiatan/`:
+File data kegiatan JSON dikelompokkan rapi ke dalam folder periode berformat **`YYYY-TW-0X`** di bawah direktori `kegiatan/`:
 
 ```
 kegiatan/
-├── Triwulan I/
+├── 2026-TW-01/
 │   └── kegiatan_auto_generated.json
-├── Triwulan II/
+├── 2026-TW-02/
 │   └── kegiatan_auto_generated.json
-├── Triwulan III/
+├── 2026-TW-03/
 │   ├── kegiatan_auto_generated.json
 │   ├── kegiatan_matching_direktori_september.json
 │   └── kegiatan_penyisiran_pal_sembilan.json
-├── Triwulan IV/
+├── 2026-TW-04/
 │   └── kegiatan_auto_generated.json
-└── Tahunan/
+└── 2026-Tahunan/
     └── kegiatan_auto_generated.json
 ```
 
-- **Penyimpanan Otomatis**: Generator `generate_kegiatan_from_rk.py` secara otomatis menyimpan hasil ke folder `kegiatan/<Periode>/kegiatan_auto_generated.json` (atau path kustom via flag `--output <PATH>`).
-- **Input Otomatis**: Skrip `auto_input_kegiatan.py` secara otomatis mendeteksi file kegiatan di dalam folder `kegiatan/<Periode>/` jika parameter `--file` tidak diisi atau jika nama file relatif terhadap folder periode tersebut.
+- **Penyimpanan Otomatis**: Generator `generate_kegiatan_from_rk.py` secara otomatis menyimpan hasil ke folder `kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json` (atau path kustom via flag `--output <PATH>`).
+- **Input Otomatis**: Skrip `auto_input_kegiatan.py` secara otomatis mendeteksi file kegiatan di dalam folder `kegiatan/<YYYY-TW-0X>/` jika parameter `--file` tidak diisi atau jika nama file relatif terhadap folder periode tersebut.
 
 ---
 
@@ -239,13 +246,13 @@ Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Roo Code, Kilo Co
 ### Skenario 1: Permintaan Pembuatan / Input Kegiatan dari SKP
 - **Prompt Contoh**: *"Buatkan kegiatan SKP Triwulan II 2026 dari akun KIPApp saya"* atau *"Masukkan kegiatan matching data untuk Triwulan III"*
 - **Tindakan Agent**:
-  1. Ambil butir SKP via `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` (otomatis tersimpan di `kegiatan/<PERIODE>/kegiatan_auto_generated.json`) atau susun kegiatan sesuai topik yang diminta pengguna ke file `kegiatan/<PERIODE>/<nama_file>.json`.
+  1. Ambil butir SKP via `generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` (otomatis tersimpan di `kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json`) atau susun kegiatan sesuai topik yang diminta pengguna ke file `kegiatan/<YYYY-TW-0X>/<nama_file>.json`.
   2. **DILARANG MENGUBAH SOURCE CODE APAPUN**.
   3. **LANGSUNG EKSEKUSI INPUT NYATA (LIVE SAVE) KE KIPAPP**:
      ```bash
      uv run python auto_input_kegiatan.py --periode "<PERIODE>"
      # atau dengan file spesifik:
-     uv run python auto_input_kegiatan.py --file "kegiatan/<PERIODE>/<nama_file>.json" --periode "<PERIODE>"
+     uv run python auto_input_kegiatan.py --file "kegiatan/<YYYY-TW-0X>/<nama_file>.json" --periode "<PERIODE>"
      ```
   4. Laporkan rincian kegiatan yang telah berhasil disimpan ke KIPApp beserta status checklist SKP-nya.
   5. **JANGAN meminta konfirmasi dry-run atau bertanya ulang apakah ingin diinputkan**, karena tindakan default adalah langsung menyimpan.
@@ -271,8 +278,8 @@ Setiap agent coding (Claude, Cursor, Copilot, Windsurf, Cline, Roo Code, Kilo Co
 ### Skenario 5: Permintaan Pencatatan Kegiatan Langsung dari Chat
 - **Prompt Contoh**: *"Catat kegiatan tanggal 29 Juni 2026: Evaluasi pendataan SE2026 untuk SKP pengolahan"*
 - **Tindakan Agent**:
-  1. Buat file JSON di dalam folder periode `kegiatan/<PERIODE>/kegiatan_catat_harian.json` berisi kegiatan tersebut (**tanpa mengubah source code**).
-  2. Jalankan `uv run python auto_input_kegiatan.py --file "kegiatan/<PERIODE>/kegiatan_catat_harian.json" --periode "<PERIODE>"`.
+  1. Buat file JSON di dalam folder periode `kegiatan/<YYYY-TW-0X>/kegiatan_catat_harian.json` berisi kegiatan tersebut (**tanpa mengubah source code**).
+  2. Jalankan `uv run python auto_input_kegiatan.py --file "kegiatan/<YYYY-TW-0X>/kegiatan_catat_harian.json" --periode "<PERIODE>"`.
 
 ### Skenario 6: Mengambil Referensi dari File Bebas (.txt, .md, Log Kerja, Catatan Harian)
 - **Prompt Contoh**: *"Saya punya catatan tugas di file catatan_mingguan.txt. Tolong baca dan cocokkan dengan butir SKP akun KIPApp saya untuk Triwulan II, lalu inputkan ke KIPApp."*

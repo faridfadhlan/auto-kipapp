@@ -36,33 +36,39 @@ Skill ini memandu agen untuk mengotomasi seluruh siklus pengisian, pelengkapan b
 
 ---
 
-## 🔄 Mode Operasional: Mode Penggunaan vs. Mode Development
+## 🔄 Mode Operasional: Konfigurasi via File `.env` (`MODE=usage` vs `MODE=development`)
 
-Agen **WAJIB** membedakan dua mode operasional berikut:
+Mode sistem dikonfigurasi melalui file **`.env`** dengan variabel `MODE`:
+```ini
+# Pilihan: 'usage' (Default) atau 'development'
+MODE=usage
+```
 
-### 1. 🟢 Mode Penggunaan (Usage / Operational Mode) — *DEFAULT*
+Agen **WAJIB** membaca setting `MODE` dan mematuhi aturan berikut:
+
+### 1. 🟢 Mode Penggunaan (`MODE=usage`) — *DEFAULT*
 - **Karakteristik**: Pengguna meminta operasional pencatatan/penginputan kegiatan harian (misal: *"buatkan kegiatan..."*, *"masukkan ke KIPApp..."*, *"catat kegiatan..."*, *"inputkan file..."*, *"update link drive..."*).
 - **ATURAN MUTLAK MODE PENGGUNAAN**:
   1. 🚫 **DILARANG KERAS MENGUBAH SOURCE CODE APAPUN**: Agen **TIDAK BOLEH** mengedit atau mengubah file Python/source code (`*.py`, `auto_input_kegiatan.py`, `generate_kegiatan_from_rk.py`, dll.).
-  2. 📁 **Simpan JSON di Folder Periode**: Semua hasil JSON disimpan di `kegiatan/<Periode>/<nama_file>.json` (contoh: `kegiatan/Triwulan III/kegiatan_auto_generated.json`), BUKAN di root folder.
+  2. 📁 **Simpan JSON di Folder Pola `YYYY-TW-0X`**: Semua hasil JSON disimpan di `kegiatan/<YYYY-TW-0X>/<nama_file>.json` (contoh: `kegiatan/2026-TW-03/kegiatan_auto_generated.json`), BUKAN di root folder.
   3. ⚡ **Eksekusi Langsung CLI**: Jalankan `uv run python auto_input_kegiatan.py --periode "<PERIODE>"` langsung ke live save tanpa mengubah kode.
 
-### 2. 🛠️ Mode Development (Development Mode)
-- **Karakteristik**: Hanya aktif jika pengguna **secara eksplisit** meminta pengembangan kode, perbaikan bug, refactoring fitur, atau modifikasi prompt/konfigurasi sistem.
+### 2. 🛠️ Mode Development (`MODE=development`)
+- **Karakteristik**: Hanya aktif jika di `.env` diset `MODE=development` ATAU pengguna **secara eksplisit** meminta pengembangan kode, perbaikan bug, refactoring fitur, atau modifikasi prompt/konfigurasi sistem.
 - **Izin**: Agen diperbolehkan membaca, mengedit, membuat file source code Python, dan memodifikasi file repositori.
 
 ---
 
-## 📂 Struktur Folder Kegiatan Berdasarkan Periode
+## 📂 Struktur Folder Kegiatan Berdasarkan Periode: Pola `YYYY-TW-0X`
 
-File JSON kegiatan dikelompokkan ke dalam folder periode di bawah direktori `kegiatan/`:
-- `kegiatan/Triwulan I/`
-- `kegiatan/Triwulan II/`
-- `kegiatan/Triwulan III/`
-- `kegiatan/Triwulan IV/`
-- `kegiatan/Tahunan/`
+File JSON kegiatan dikelompokkan ke dalam folder periode berformat **`YYYY-TW-0X`** di bawah direktori `kegiatan/`:
+- `kegiatan/2026-TW-01/`
+- `kegiatan/2026-TW-02/`
+- `kegiatan/2026-TW-03/`
+- `kegiatan/2026-TW-04/`
+- `kegiatan/2026-Tahunan/`
 
-Generator `generate_kegiatan_from_rk.py` otomatis menyimpan output ke `kegiatan/<Periode>/kegiatan_auto_generated.json`, dan `auto_input_kegiatan.py` otomatis mencari file di folder periode tersebut.
+Generator `generate_kegiatan_from_rk.py` otomatis menyimpan output ke `kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json`, dan `auto_input_kegiatan.py` otomatis mencari file di folder periode tersebut.
 
 ---
 
@@ -125,7 +131,7 @@ Agen dan skrip **secara otomatis mengenali dan menyesuaikan triwulan serta tahun
 
 ### 1. Auto-Generate Kegiatan Dinamis & Pencatatan Langsung
 Jika pengguna meminta *"buatkan kegiatan..."*, *"masukkan kegiatan..."*, atau *"catat kegiatan..."*:
-- Jalankan generator (hasil otomatis tersimpan di `kegiatan/<Periode>/kegiatan_auto_generated.json`) atau susun kegiatan ke file JSON di folder periode tersebut.
+- Jalankan generator (hasil otomatis tersimpan di `kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json`) atau susun kegiatan ke file JSON di folder periode tersebut.
 - **DILARANG MENGUBAH SOURCE CODE APAPUN** (Mode Penggunaan).
 - **LANGSUNG inputkan ke KIPApp (`uv run python auto_input_kegiatan.py --periode "<PERIODE>"`) secara default**.
 - **JANGAN meminta konfirmasi dry-run lagi**, langsung laporkan kegiatan yang berhasil tersimpan ke KIPApp.

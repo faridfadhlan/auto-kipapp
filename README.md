@@ -36,7 +36,7 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 | `auto_input_kegiatan.py` | Skrip utama input kegiatan (otomatis menggunakan REST API super cepat, fallback ke Playwright browser atau flag `--browser`). |
 | `edit_kegiatan.py` | Skrip otomasi untuk mengedit/memperbarui butir kegiatan (update tautan bukti dukung, progres, capaian, dan checklist SKP secara massal). |
 | `generate_kegiatan_from_rk.py` | Generator kegiatan otomatis dari butir SKP pengguna (bisa fetch otomatis via API/browser atau input manual). |
-| `kegiatan/` | Direktori pengelompokan file JSON kegiatan berdasarkan periode (`Triwulan I/` s.d `Triwulan IV/`, `Tahunan/`). |
+| `kegiatan/` | Direktori pengelompokan file JSON kegiatan berdasarkan periode dengan pola `YYYY-TW-0X` (`2026-TW-01/` s.d `2026-TW-04/`, `2026-Tahunan/`). |
 | `daftar_kegiatan_template.json` | Template data kegiatan berformat JSON. |
 | `launch_login.py` | Skrip untuk membuka browser dan login manual pertama kali jika sesi kedaluwarsa. |
 | `browser_data/` | Direktori penyimpanan profil browser & cookies (aman dan diabaikan oleh git). |
@@ -53,16 +53,21 @@ Aplikasi otomasi berbasis Playwright untuk mempermudah dan mempercepat pengisian
 
 ## 🔄 Mode Operasional: Mode Penggunaan vs. Mode Development
 
-Sistem ini didesain dengan dua mode operasional yang jelas bagi setiap AI Coding Agent:
+Mode operasional sistem dikonfigurasi melalui file `.env` menggunakan parameter `MODE`:
 
-### 1. 🟢 Mode Penggunaan (Usage / Operational Mode) — *Default*
+```env
+# Mode kerja AI Coding Agent: "usage" (default) atau "development"
+MODE=usage
+```
+
+### 1. 🟢 Mode Penggunaan (Usage / Operational Mode) — *Default (`MODE=usage`)*
 - Digunakan saat berinteraksi harian: meminta AI menyusun kegiatan, menginputkan data ke KIPApp, memeriksa status SKP, atau mengupdate link bukti dukung.
 - 🚫 **DILARANG MENGUBAH SOURCE CODE APAPUN**: AI tidak boleh menyentuh atau mengedit file Python (`*.py`).
-- 📁 **Penyimpanan Terorganisir**: Semua file JSON kegiatan dikumpulkan rapi di dalam folder periode `kegiatan/<Periode>/` (misalnya `kegiatan/Triwulan III/kegiatan_auto_generated.json`), tanpa berserakan di root.
+- 📁 **Penyimpanan Terorganisir**: Semua file JSON kegiatan dikumpulkan rapi di dalam folder periode `kegiatan/<YYYY-TW-0X>/` (misalnya `kegiatan/2026-TW-03/kegiatan_auto_generated.json`), tanpa berserakan di root.
 - ⚡ **Live Save Default**: Langsung menyimpan ke KIPApp secara otomatis tanpa menanyakan konfirmasi dry-run.
 
-### 2. 🛠️ Mode Development (Development Mode)
-- Diaktifkan hanya jika pengguna secara eksplisit meminta pengembangan kode, perbaikan bug, penambahan fitur pada skrip, atau modifikasi konfigurasi/prompt.
+### 2. 🛠️ Mode Development (Development Mode — `MODE=development`)
+- Diaktifkan jika pengguna mengatur `MODE=development` di `.env` atau secara eksplisit meminta pengembangan kode, perbaikan bug, penambahan fitur pada skrip, atau modifikasi konfigurasi/prompt.
 - AI diperbolehkan mengedit dan memperbarui file source code.
 
 ---
@@ -224,26 +229,26 @@ Agent AI secara otomatis membaca seluruh pedoman dan modul otomasi (`AGENTS.md`,
 Semua skrip otomatis berjalan dalam **mode REST API super cepat** secara default:
 
 ```bash
-# 1. Fetch SKP & Auto-Generate Kegiatan (otomatis disimpan di kegiatan/<Periode>/kegiatan_auto_generated.json)
-uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan III"
+# 1. Fetch SKP & Auto-Generate Kegiatan (otomatis disimpan di kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json)
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "2026-TW-03"
 
-# 2. Input Kegiatan Cepat via REST API (otomatis mendeteksi file di kegiatan/<Periode>/)
-uv run python auto_input_kegiatan.py --periode "Triwulan III"
+# 2. Input Kegiatan Cepat via REST API (otomatis mendeteksi file di kegiatan/2026-TW-03/)
+uv run python auto_input_kegiatan.py --periode "2026-TW-03"
 
 # Atau dengan path file eksplisit:
-uv run python auto_input_kegiatan.py --file "kegiatan/Triwulan III/kegiatan_auto_generated.json" --periode "Triwulan III"
+uv run python auto_input_kegiatan.py --file "kegiatan/2026-TW-03/kegiatan_auto_generated.json" --periode "2026-TW-03"
 
 # 3. Input Kegiatan Mode Browser Visual (Playwright)
-uv run python auto_input_kegiatan.py --periode "Triwulan III" --browser
+uv run python auto_input_kegiatan.py --periode "2026-TW-03" --browser
 
 # 4. Edit Bukti Dukung / Progres Massal via REST API
-uv run python edit_kegiatan.py --periode "Triwulan III" --drive-url "https://drive.google.com/..." --all
+uv run python edit_kegiatan.py --periode "2026-TW-03" --drive-url "https://drive.google.com/..." --all
 
 # 5. Utilitas REST API Langsung (Inspeksi & Checklist)
 uv run python kipapp_api.py --list-skp
-uv run python kipapp_api.py --list-rk --periode "Triwulan III"
-uv run python kipapp_api.py --list-kegiatan --periode "Triwulan III"
-uv run python kipapp_api.py --update-checklists --periode "Triwulan III"
+uv run python kipapp_api.py --list-rk --periode "2026-TW-03"
+uv run python kipapp_api.py --list-kegiatan --periode "2026-TW-03"
+uv run python kipapp_api.py --update-checklists --periode "2026-TW-03"
 ```
 
 ## ☁️ Integrasi Google Drive (Auto-Upload Bukti Dukung)

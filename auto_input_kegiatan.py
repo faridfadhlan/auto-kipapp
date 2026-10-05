@@ -4,6 +4,12 @@ import argparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 def get_browser_data_dir(custom_path: str = "") -> Path:
     """
     Menemukan direktori browser_data secara dinamis:
@@ -199,21 +205,52 @@ def load_activities(file_path: Path):
 
 def normalize_periode(periode_str: str) -> str:
     """
-    Menormalkan format triwulan input (misal: 'TW 1', 'triwulan 3')
+    Menormalkan format triwulan input (misal: 'TW 1', 'triwulan 3', '2026-TW-03')
     menjadi format standar KIPApp ('Triwulan I', 'Triwulan III', dst.)
     """
     p = str(periode_str).strip().lower()
-    if re.search(r'\b(tw|triwulan)?\s*(iv|4)\b', p):
+    if re.search(r'(tw|triwulan)?[-_\s]*(0?4|iv)\b', p):
         return "Triwulan IV"
-    elif re.search(r'\b(tw|triwulan)?\s*(iii|3)\b', p):
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?3|iii)\b', p):
         return "Triwulan III"
-    elif re.search(r'\b(tw|triwulan)?\s*(ii|2)\b', p):
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?2|ii)\b', p):
         return "Triwulan II"
-    elif re.search(r'\b(tw|triwulan)?\s*(i|1)\b', p):
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?1|i)\b', p):
         return "Triwulan I"
     elif "tahunan" in p:
         return "Tahunan"
     return periode_str
+
+def get_period_folder_name(periode_str: str, tahun: str | int = "") -> str:
+    """
+    Mengubah periode dan tahun menjadi format folder YYYY-TW-0X
+    Contoh: ('Triwulan 3', 2026) -> '2026-TW-03'
+            ('Triwulan I', 2026) -> '2026-TW-01'
+            ('2026-TW-03', None) -> '2026-TW-03'
+            ('Tahunan', 2026) -> '2026-Tahunan'
+    """
+    p = str(periode_str).strip().lower()
+    th = None
+    if tahun and str(tahun).isdigit():
+        th = int(tahun)
+    else:
+        year_match = re.search(r'\b(20\d{2})\b', p)
+        if year_match:
+            th = int(year_match.group(1))
+        else:
+            th = 2026
+
+    if re.search(r'(tw|triwulan)?[-_\s]*(0?4|iv)\b', p):
+        return f"{th}-TW-04"
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?3|iii)\b', p):
+        return f"{th}-TW-03"
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?2|ii)\b', p):
+        return f"{th}-TW-02"
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?1|i)\b', p):
+        return f"{th}-TW-01"
+    elif "tahunan" in p:
+        return f"{th}-Tahunan"
+    return f"{th}-{periode_str}"
 
 def input_kegiatan_api(
     activities: list,
@@ -353,6 +390,7 @@ def input_kegiatan_api(
 
 def input_kegiatan(file_path: str = "", periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", gdrive_folder_id: str = "", browser_data: str = "", dry_run: bool = False, use_browser: bool = False):
     norm_periode = normalize_periode(periode_keyword)
+    folder_name = get_period_folder_name(periode_keyword, tahun=tahun)
 
     activities_file = None
     if file_path:
@@ -360,30 +398,36 @@ def input_kegiatan(file_path: str = "", periode_keyword: str = "Triwulan II", ta
         if p.exists():
             activities_file = p
         else:
-            # Cek apakah ada di folder kegiatan/<norm_periode>/<file_path>
-            p_in_folder = Path("kegiatan") / norm_periode / file_path
+            # Cek apakah ada di folder kegiatan/<folder_name>/<file_path> atau kegiatan/<norm_periode>/<file_path>
+            p_in_folder = Path("kegiatan") / folder_name / file_path
+            p_in_legacy = Path("kegiatan") / norm_periode / file_path
             if p_in_folder.exists():
                 activities_file = p_in_folder
+            elif p_in_legacy.exists():
+                activities_file = p_in_legacy
 
     if not activities_file or not activities_file.exists():
-        # Coba auto-detect di folder kegiatan/<norm_periode>/
-        cand_period = Path("kegiatan") / norm_periode / "kegiatan_auto_generated.json"
+        # Coba auto-detect di folder kegiatan/<folder_name>/
+        cand_folder = Path("kegiatan") / folder_name / "kegiatan_auto_generated.json"
+        cand_legacy = Path("kegiatan") / norm_periode / "kegiatan_auto_generated.json"
         cand_root = Path("kegiatan_auto_generated.json")
         cand_tmpl = Path("daftar_kegiatan_template.json")
 
         if file_path and file_path != "daftar_kegiatan_template.json":
             print(f"[ERROR] File kegiatan '{file_path}' tidak ditemukan!")
             if not file_path.startswith("kegiatan/"):
-                print(f"       (Juga diperiksa di '{Path('kegiatan') / norm_periode / file_path}')")
+                print(f"       (Juga diperiksa di '{Path('kegiatan') / folder_name / file_path}')")
             return
-        elif cand_period.exists():
-            activities_file = cand_period
+        elif cand_folder.exists():
+            activities_file = cand_folder
+        elif cand_legacy.exists():
+            activities_file = cand_legacy
         elif cand_root.exists():
             activities_file = cand_root
         elif cand_tmpl.exists():
             activities_file = cand_tmpl
         else:
-            print(f"[ERROR] File kegiatan tidak ditemukan di '{cand_period}' maupun '{cand_root}'!")
+            print(f"[ERROR] File kegiatan tidak ditemukan di '{cand_folder}' maupun '{cand_root}'!")
             return
 
     print(f"Menggunakan file kegiatan: {activities_file}")
@@ -671,8 +715,8 @@ def input_kegiatan(file_path: str = "", periode_keyword: str = "Triwulan II", ta
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Otomasi Input Kegiatan KIPApp BPS")
-    parser.add_argument("--file", "-f", default="", help="Path ke file data kegiatan (.xlsx, .csv, .json, .txt). Jika dikosongkan, otomatis mencari di kegiatan/<periode>/kegiatan_auto_generated.json")
-    parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', 'TW IV')")
+    parser.add_argument("--file", "-f", default="", help="Path ke file data kegiatan (.xlsx, .csv, .json, .txt). Jika dikosongkan, otomatis mencari di kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json")
+    parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', '2026-TW-03', 'Tahunan')")
     parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")
     parser.add_argument("--gdrive-folder-id", default="", help="ID Folder Google Drive tujuan jika bukti dukung berupa file lokal")

@@ -16,23 +16,24 @@ Otomasi pengisian catatan kegiatan harian pegawai BPS ke sistem KIPApp menggunak
 - **Triwulan & Tahun**: Tangani triwulan (`Triwulan I`, `Triwulan II`, `Triwulan III`, `Triwulan IV`, `Tahunan`) dan tahun anggaran secara otomatis sesuai prompt pengguna. Tanggal kerja disebarkan ke hari kerja Senin–Jumat.
 - **Eksekusi Otomatis Langsung**: Jika ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default. JANGAN meminta konfirmasi dry-run lagi kecuali jika pengguna secara eksplisit meminta preview / simulasi tanpa simpan.
 
-## Mode Operasional: Mode Penggunaan vs. Mode Development
-- **1. Mode Penggunaan (Default - Operasional Harian)**:
+## Mode Operasional: Konfigurasi via File `.env` (`MODE=usage` vs `MODE=development`)
+Diatur melalui variabel `MODE` pada file `.env`:
+- **1. Mode Penggunaan (`MODE=usage` - Default Operasional Harian)**:
   - Digunakan saat pengguna meminta membuat/menginput kegiatan harian, mengecek SKP, memverifikasi capaian, mengupload bukti dukung, dll.
   - 🚫 **DILARANG MENGUBAH SOURCE CODE APAPUN** (`*.py`, skrip otomasi).
-  - 📁 **Simpan File JSON di Folder Periode**: Semua hasil generate atau draft JSON disimpan di `kegiatan/<Periode>/` (contoh: `kegiatan/Triwulan III/kegiatan_auto_generated.json`), BUKAN di root workspace.
+  - 📁 **Simpan File JSON di Folder Pola `YYYY-TW-0X`**: Semua hasil generate atau draft JSON disimpan di `kegiatan/<YYYY-TW-0X>/` (contoh: `kegiatan/2026-TW-03/kegiatan_auto_generated.json`), BUKAN di root workspace.
   - ⚡ **Eksekusi Langsung (Live Save)**: Simpan langsung ke KIPApp secara default tanpa konfirmasi dry-run.
-- **2. Mode Development**:
-  - HANYA aktif jika pengguna secara eksplisit meminta pengembangan/perbaikan kode ("mode dev", "tambah fitur", "fix bug").
+- **2. Mode Development (`MODE=development`)**:
+  - HANYA aktif jika di `.env` diset `MODE=development` ATAU pengguna secara eksplisit meminta pengembangan/perbaikan kode ("mode dev", "tambah fitur", "fix bug").
   - Diperbolehkan mengubah source code Python dan struktur proyek.
 
-## Struktur Folder Kegiatan Berdasarkan Periode
-Semua file JSON hasil kegiatan dikumpulkan di subfolder periode masing-masing di bawah `kegiatan/`:
-- `kegiatan/Triwulan I/`
-- `kegiatan/Triwulan II/`
-- `kegiatan/Triwulan III/`
-- `kegiatan/Triwulan IV/`
-- `kegiatan/Tahunan/`
+## Struktur Folder Kegiatan: Pola `YYYY-TW-0X`
+Semua file JSON hasil kegiatan dikumpulkan di subfolder periode berformat `YYYY-TW-0X` di bawah `kegiatan/`:
+- `kegiatan/2026-TW-01/`
+- `kegiatan/2026-TW-02/`
+- `kegiatan/2026-TW-03/`
+- `kegiatan/2026-TW-04/`
+- `kegiatan/2026-Tahunan/`
 
 ## Perintah Utama
 Jalankan perintah menggunakan `uv run python <script>` atau `python3 <script>` (otomatis berjalan via REST API super cepat):
@@ -41,19 +42,19 @@ Jalankan perintah menggunakan `uv run python <script>` atau `python3 <script>` (
 # 1. Login pertama kali / perpanjang sesi
 uv run python launch_login.py
 
-# 2. Auto-fetch SKP dan buat kegiatan dinamis (otomatis disimpan ke kegiatan/<Periode>/)
-uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II" --tahun 2026
+# 2. Auto-fetch SKP dan buat kegiatan dinamis (otomatis disimpan ke kegiatan/<YYYY-TW-0X>/)
+uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "2026-TW-03"
 
 # 3. Buat kegiatan dari SKP manual pengguna
-uv run python generate_kegiatan_from_rk.py --rk "Butir SKP 1; Butir SKP 2" --periode "Triwulan II"
+uv run python generate_kegiatan_from_rk.py --rk "Butir SKP 1; Butir SKP 2" --periode "2026-TW-03"
 
-# 4. Input kegiatan via REST API super cepat (Otomatis mendeteksi file di kegiatan/<Periode>/)
-uv run python auto_input_kegiatan.py --periode "Triwulan II" --drive-url "<URL_DRIVE>"
+# 4. Input kegiatan via REST API super cepat (Otomatis mendeteksi file di kegiatan/<YYYY-TW-0X>/)
+uv run python auto_input_kegiatan.py --periode "2026-TW-03" --drive-url "<URL_DRIVE>"
 # Atau dengan path file eksplisit:
-uv run python auto_input_kegiatan.py --file "kegiatan/Triwulan II/kegiatan_auto_generated.json" --periode "Triwulan II"
+uv run python auto_input_kegiatan.py --file "kegiatan/2026-TW-03/kegiatan_auto_generated.json" --periode "2026-TW-03"
 
 # 5. Input kegiatan mode Playwright Browser visual
-uv run python auto_input_kegiatan.py --periode "Triwulan II" --browser
+uv run python auto_input_kegiatan.py --periode "2026-TW-03" --browser
 
 # 6. Preview input kegiatan (Dry Run tanpa klik Save)
 uv run python auto_input_kegiatan.py --periode "Triwulan II" --dry-run

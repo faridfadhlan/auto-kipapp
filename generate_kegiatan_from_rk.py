@@ -6,6 +6,12 @@ import argparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 def get_browser_data_dir(custom_path: str = "") -> Path:
     """
     Menemukan direktori browser_data secara dinamis:
@@ -129,28 +135,61 @@ def get_period_dates(periode_str: str, tahun: int = None) -> tuple[str, str, str
     """
     Menormalkan nama triwulan dan menghitung rentang tanggal default (start, end)
     Contoh: 'Triwulan 1' -> ('Triwulan I', '2026-01-01', '2026-03-31')
+            '2026-TW-03' -> ('Triwulan III', '2026-07-01', '2026-09-30')
     """
     p = str(periode_str).strip().lower()
     if tahun is None or not str(tahun).isdigit():
-        tahun = datetime.date.today().year
-        for token in p.split():
-            if token.isdigit() and len(token) == 4:
-                tahun = int(token)
+        year_match = re.search(r'\b(20\d{2})\b', p)
+        if year_match:
+            tahun = int(year_match.group(1))
+        else:
+            tahun = datetime.date.today().year
     else:
         tahun = int(tahun)
 
-    if re.search(r'\b(tw|triwulan)?\s*(iv|4)\b', p):
+    if re.search(r'(tw|triwulan)?[-_\s]*(0?4|iv)\b', p):
         return "Triwulan IV", f"{tahun}-10-01", f"{tahun}-12-31"
-    elif re.search(r'\b(tw|triwulan)?\s*(iii|3)\b', p):
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?3|iii)\b', p):
         return "Triwulan III", f"{tahun}-07-01", f"{tahun}-09-30"
-    elif re.search(r'\b(tw|triwulan)?\s*(ii|2)\b', p):
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?2|ii)\b', p):
         return "Triwulan II", f"{tahun}-04-01", f"{tahun}-06-30"
-    elif re.search(r'\b(tw|triwulan)?\s*(i|1)\b', p):
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?1|i)\b', p):
         return "Triwulan I", f"{tahun}-01-01", f"{tahun}-03-31"
     elif "tahunan" in p:
         return "Tahunan", f"{tahun}-01-01", f"{tahun}-12-31"
         
     return periode_str, f"{tahun}-04-01", f"{tahun}-06-30"
+
+def get_period_folder_name(periode_str: str, tahun: str | int = "") -> str:
+    """
+    Mengubah periode dan tahun menjadi format folder YYYY-TW-0X
+    Contoh: ('Triwulan 3', 2026) -> '2026-TW-03'
+            ('Triwulan I', 2026) -> '2026-TW-01'
+            ('2026-TW-03', None) -> '2026-TW-03'
+            ('Tahunan', 2026) -> '2026-Tahunan'
+    """
+    p = str(periode_str).strip().lower()
+    th = None
+    if tahun and str(tahun).isdigit():
+        th = int(tahun)
+    else:
+        year_match = re.search(r'\b(20\d{2})\b', p)
+        if year_match:
+            th = int(year_match.group(1))
+        else:
+            th = datetime.date.today().year
+
+    if re.search(r'(tw|triwulan)?[-_\s]*(0?4|iv)\b', p):
+        return f"{th}-TW-04"
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?3|iii)\b', p):
+        return f"{th}-TW-03"
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?2|ii)\b', p):
+        return f"{th}-TW-02"
+    elif re.search(r'(tw|triwulan)?[-_\s]*(0?1|i)\b', p):
+        return f"{th}-TW-01"
+    elif "tahunan" in p:
+        return f"{th}-Tahunan"
+    return f"{th}-{periode_str}"
 
 def fetch_user_rencana_kinerja(periode_keyword: str = "Triwulan II", tahun: str = "", browser_data: str = "") -> list[str]:
     """
@@ -313,10 +352,11 @@ def generate_activities_for_rk_list(
 
     generated.sort(key=lambda x: x["tanggal"])
 
+    folder_name = get_period_folder_name(periode, tahun=start_date[:4] if start_date else "")
     if output_file:
         out_file = Path(output_file)
-    elif periode:
-        out_dir = Path("kegiatan") / periode
+    elif folder_name:
+        out_dir = Path("kegiatan") / folder_name
         out_dir.mkdir(parents=True, exist_ok=True)
         out_file = out_dir / "kegiatan_auto_generated.json"
     else:
@@ -333,7 +373,7 @@ def generate_activities_for_rk_list(
 def main():
     parser = argparse.ArgumentParser(description="Generator Kegiatan KIPApp Dinamis dari Rencana Kinerja Pengguna")
     parser.add_argument("--fetch-rk", action="store_true", help="Ambil daftar RK otomatis langsung dari akun KIPApp yang login")
-    parser.add_argument("--periode", "-p", default="Triwulan II", help="Periode SKP target (contoh: 'Triwulan I', 'Triwulan 3', 'TW IV', 'Tahunan')")
+    parser.add_argument("--periode", "-p", default="Triwulan II", help="Periode SKP target (contoh: 'Triwulan I', 'Triwulan 3', '2026-TW-03', 'Tahunan')")
     parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--rk", help="Daftar butir RK manual (pisahkan dengan titik koma ';')")
     parser.add_argument("--rk-file", help="Path ke file JSON/TXT daftar RK pengguna")
@@ -343,7 +383,7 @@ def main():
     parser.add_argument("--count", "-c", type=int, default=2, help="Jumlah kegiatan per butir RK (default: 2)")
     parser.add_argument("--templates", help="Path ke file JSON custom templates (opsional)")
     parser.add_argument("--browser-data", default="", help="Lokasi kustom direktori browser_data (opsional)")
-    parser.add_argument("--output", "-o", default="", help="Path kustom file output JSON (default: kegiatan/<periode>/kegiatan_auto_generated.json)")
+    parser.add_argument("--output", "-o", default="", help="Path kustom file output JSON (default: kegiatan/<YYYY-TW-0X>/kegiatan_auto_generated.json)")
 
     args = parser.parse_args()
 
