@@ -247,7 +247,9 @@ def generate_activities_for_rk_list(
     end_date: str = "2026-06-30",
     drive_url: str = "",
     activities_per_rk: int = 2,
-    custom_templates_file: str = ""
+    custom_templates_file: str = "",
+    output_file: str = "",
+    periode: str = ""
 ):
     """
     Menyusun kegiatan harian realistis dari daftar Rencana Kinerja dinamis
@@ -311,7 +313,16 @@ def generate_activities_for_rk_list(
 
     generated.sort(key=lambda x: x["tanggal"])
 
-    out_file = Path("kegiatan_auto_generated.json")
+    if output_file:
+        out_file = Path(output_file)
+    elif periode:
+        out_dir = Path("kegiatan") / periode
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_file = out_dir / "kegiatan_auto_generated.json"
+    else:
+        out_file = Path("kegiatan_auto_generated.json")
+
+    out_file.parent.mkdir(parents=True, exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(generated, f, indent=2, ensure_ascii=False)
 
@@ -332,6 +343,7 @@ def main():
     parser.add_argument("--count", "-c", type=int, default=2, help="Jumlah kegiatan per butir RK (default: 2)")
     parser.add_argument("--templates", help="Path ke file JSON custom templates (opsional)")
     parser.add_argument("--browser-data", default="", help="Lokasi kustom direktori browser_data (opsional)")
+    parser.add_argument("--output", "-o", default="", help="Path kustom file output JSON (default: kegiatan/<periode>/kegiatan_auto_generated.json)")
 
     args = parser.parse_args()
 
@@ -371,7 +383,9 @@ def main():
             end_date=end_date,
             drive_url=args.drive_url,
             activities_per_rk=args.count,
-            custom_templates_file=args.templates or ""
+            custom_templates_file=args.templates or "",
+            output_file=args.output,
+            periode=norm_periode
         )
 
 if __name__ == "__main__":

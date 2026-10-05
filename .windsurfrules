@@ -3,14 +3,25 @@
 ## Konteks Proyek
 Aplikasi otomasi berbasis Playwright untuk mencatat dan menginput kegiatan harian pegawai ke KIPApp BPS (https://kipapp.bps.go.id).
 
+## Mode Operasional
+- **Mode Penggunaan (Default)**:
+  - Operasional harian: input kegiatan, generate SKP, cek data, update link drive.
+  - 🚫 **DILARANG MENGUBAH SOURCE CODE APAPUN** (`*.py`).
+  - 📁 **Simpan File JSON di Folder Periode**: Simpan berkas kegiatan JSON di `kegiatan/<Periode>/` (contoh: `kegiatan/Triwulan III/kegiatan_auto_generated.json`), BUKAN di root workspace.
+  - ⚡ **Live Save Default**: Langsung simpan ke KIPApp secara default tanpa konfirmasi dry-run.
+- **Mode Development**:
+  - HANYA aktif jika diminta eksplisit pengembangan/perbaikan kode ("mode dev", "tambah fitur", "fix bug"). Diperbolehkan mengubah source code.
+
 ## Aturan Agen Cascade
 - **Privasi**: Dilarang mengekspos NIP, token sesi JWT, kredensial, atau folder `browser_data/`.
 - **Lokasi Kerja**: Operasikan selalu dari direktori proyek aktif pengguna saat ini (`cwd`).
 - **SKP Dinamis**: Sesuaikan butir Rencana Kinerja secara dinamis per pegawai (gunakan `--fetch-rk` atau input pengguna).
+- **Centang Capaian SKP**: Selalu centang opsi *"Masukan ke capaian SKP"* secara default.
 - **Eksekusi Langsung**: Setiap ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default tanpa konfirmasi dry-run lagi.
 - **Periode Triwulan**: Sesuaikan otomatis Triwulan I, II, III, IV dan tahun anggaran dari prompt.
 
 ## Perintah Penting
 - Buka login: `uv run python launch_login.py`
-- Generate kegiatan: `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"`
-- Input kegiatan: `uv run python auto_input_kegiatan.py --file <FILE> --periode "<PERIODE>" --drive-url "<URL>"`
+- Generate kegiatan: `uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "<PERIODE>"` (otomatis tersimpan di `kegiatan/<Periode>/`)
+- Input kegiatan: `uv run python auto_input_kegiatan.py --periode "<PERIODE>" --drive-url "<URL>"`
+- Input dengan file spesifik: `uv run python auto_input_kegiatan.py --file "kegiatan/<PERIODE>/kegiatan_auto_generated.json" --periode "<PERIODE>"`

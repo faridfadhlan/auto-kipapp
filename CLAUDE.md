@@ -16,6 +16,24 @@ Otomasi pengisian catatan kegiatan harian pegawai BPS ke sistem KIPApp menggunak
 - **Triwulan & Tahun**: Tangani triwulan (`Triwulan I`, `Triwulan II`, `Triwulan III`, `Triwulan IV`, `Tahunan`) dan tahun anggaran secara otomatis sesuai prompt pengguna. Tanggal kerja disebarkan ke hari kerja Senin–Jumat.
 - **Eksekusi Otomatis Langsung**: Jika ada perintah memasukkan / membuatkan / mencatat kegiatan atau sejenisnya, LANGSUNG eksekusi input nyata (live save) ke KIPApp secara default. JANGAN meminta konfirmasi dry-run lagi kecuali jika pengguna secara eksplisit meminta preview / simulasi tanpa simpan.
 
+## Mode Operasional: Mode Penggunaan vs. Mode Development
+- **1. Mode Penggunaan (Default - Operasional Harian)**:
+  - Digunakan saat pengguna meminta membuat/menginput kegiatan harian, mengecek SKP, memverifikasi capaian, mengupload bukti dukung, dll.
+  - 🚫 **DILARANG MENGUBAH SOURCE CODE APAPUN** (`*.py`, skrip otomasi).
+  - 📁 **Simpan File JSON di Folder Periode**: Semua hasil generate atau draft JSON disimpan di `kegiatan/<Periode>/` (contoh: `kegiatan/Triwulan III/kegiatan_auto_generated.json`), BUKAN di root workspace.
+  - ⚡ **Eksekusi Langsung (Live Save)**: Simpan langsung ke KIPApp secara default tanpa konfirmasi dry-run.
+- **2. Mode Development**:
+  - HANYA aktif jika pengguna secara eksplisit meminta pengembangan/perbaikan kode ("mode dev", "tambah fitur", "fix bug").
+  - Diperbolehkan mengubah source code Python dan struktur proyek.
+
+## Struktur Folder Kegiatan Berdasarkan Periode
+Semua file JSON hasil kegiatan dikumpulkan di subfolder periode masing-masing di bawah `kegiatan/`:
+- `kegiatan/Triwulan I/`
+- `kegiatan/Triwulan II/`
+- `kegiatan/Triwulan III/`
+- `kegiatan/Triwulan IV/`
+- `kegiatan/Tahunan/`
+
 ## Perintah Utama
 Jalankan perintah menggunakan `uv run python <script>` atau `python3 <script>` (otomatis berjalan via REST API super cepat):
 
@@ -23,20 +41,22 @@ Jalankan perintah menggunakan `uv run python <script>` atau `python3 <script>` (
 # 1. Login pertama kali / perpanjang sesi
 uv run python launch_login.py
 
-# 2. Auto-fetch SKP dan buat kegiatan dinamis via REST API (~0.2 detik)
+# 2. Auto-fetch SKP dan buat kegiatan dinamis (otomatis disimpan ke kegiatan/<Periode>/)
 uv run python generate_kegiatan_from_rk.py --fetch-rk --periode "Triwulan II" --tahun 2026
 
 # 3. Buat kegiatan dari SKP manual pengguna
 uv run python generate_kegiatan_from_rk.py --rk "Butir SKP 1; Butir SKP 2" --periode "Triwulan II"
 
-# 4. Input kegiatan via REST API super cepat (Default)
-uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --drive-url "<URL_DRIVE>"
+# 4. Input kegiatan via REST API super cepat (Otomatis mendeteksi file di kegiatan/<Periode>/)
+uv run python auto_input_kegiatan.py --periode "Triwulan II" --drive-url "<URL_DRIVE>"
+# Atau dengan path file eksplisit:
+uv run python auto_input_kegiatan.py --file "kegiatan/Triwulan II/kegiatan_auto_generated.json" --periode "Triwulan II"
 
 # 5. Input kegiatan mode Playwright Browser visual
-uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --browser
+uv run python auto_input_kegiatan.py --periode "Triwulan II" --browser
 
 # 6. Preview input kegiatan (Dry Run tanpa klik Save)
-uv run python auto_input_kegiatan.py --file kegiatan_auto_generated.json --periode "Triwulan II" --dry-run
+uv run python auto_input_kegiatan.py --periode "Triwulan II" --dry-run
 
 # 7. Edit / pembaruan massal bukti dukung & capaian
 uv run python edit_kegiatan.py --periode "Triwulan II" --drive-url "<URL_DRIVE>" --all

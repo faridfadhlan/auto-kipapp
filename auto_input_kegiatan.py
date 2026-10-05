@@ -351,11 +351,42 @@ def input_kegiatan_api(
         return False
 
 
-def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", gdrive_folder_id: str = "", browser_data: str = "", dry_run: bool = False, use_browser: bool = False):
-    activities_file = Path(file_path)
-    if not activities_file.exists():
-        print(f"[ERROR] File kegiatan {file_path} tidak ditemukan!")
-        return
+def input_kegiatan(file_path: str = "", periode_keyword: str = "Triwulan II", tahun: str = "", default_drive_url: str = "", gdrive_folder_id: str = "", browser_data: str = "", dry_run: bool = False, use_browser: bool = False):
+    norm_periode = normalize_periode(periode_keyword)
+
+    activities_file = None
+    if file_path:
+        p = Path(file_path)
+        if p.exists():
+            activities_file = p
+        else:
+            # Cek apakah ada di folder kegiatan/<norm_periode>/<file_path>
+            p_in_folder = Path("kegiatan") / norm_periode / file_path
+            if p_in_folder.exists():
+                activities_file = p_in_folder
+
+    if not activities_file or not activities_file.exists():
+        # Coba auto-detect di folder kegiatan/<norm_periode>/
+        cand_period = Path("kegiatan") / norm_periode / "kegiatan_auto_generated.json"
+        cand_root = Path("kegiatan_auto_generated.json")
+        cand_tmpl = Path("daftar_kegiatan_template.json")
+
+        if file_path and file_path != "daftar_kegiatan_template.json":
+            print(f"[ERROR] File kegiatan '{file_path}' tidak ditemukan!")
+            if not file_path.startswith("kegiatan/"):
+                print(f"       (Juga diperiksa di '{Path('kegiatan') / norm_periode / file_path}')")
+            return
+        elif cand_period.exists():
+            activities_file = cand_period
+        elif cand_root.exists():
+            activities_file = cand_root
+        elif cand_tmpl.exists():
+            activities_file = cand_tmpl
+        else:
+            print(f"[ERROR] File kegiatan tidak ditemukan di '{cand_period}' maupun '{cand_root}'!")
+            return
+
+    print(f"Menggunakan file kegiatan: {activities_file}")
 
     try:
         activities = load_activities(activities_file)
@@ -366,8 +397,6 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
     if not activities:
         print("[WARNING] Tidak ada data kegiatan untuk diinput.")
         return
-
-    norm_periode = normalize_periode(periode_keyword)
 
     # 1. Jika pengguna tidak memaksa mode browser dan bukan dry-run preview screenshot, gunakan REST API instan
     if not use_browser:
@@ -642,7 +671,7 @@ def input_kegiatan(file_path: str, periode_keyword: str = "Triwulan II", tahun: 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Otomasi Input Kegiatan KIPApp BPS")
-    parser.add_argument("--file", "-f", default="daftar_kegiatan_template.json", help="Path ke file data kegiatan (.xlsx, .csv, .json, .txt)")
+    parser.add_argument("--file", "-f", default="", help="Path ke file data kegiatan (.xlsx, .csv, .json, .txt). Jika dikosongkan, otomatis mencari di kegiatan/<periode>/kegiatan_auto_generated.json")
     parser.add_argument("--periode", "-p", default="Triwulan II", help="Kata kunci periode SKP (default: Triwulan II, contoh: 'Triwulan I', 'Triwulan 3', 'TW IV')")
     parser.add_argument("--tahun", "-t", default="", help="Tahun anggaran/SKP (contoh: 2026)")
     parser.add_argument("--drive-url", "-d", default="", help="Default link Google Drive jika per-kegiatan tidak diisi")
