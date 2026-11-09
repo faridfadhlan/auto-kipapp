@@ -26,6 +26,8 @@ gdrive_credentials*.json
 *.jpeg
 *.txt
 !requirements.txt
+*_raw.js
+*_decoded.js
 
 # Data dumps and generated activity files containing user data
 *_dump.json
